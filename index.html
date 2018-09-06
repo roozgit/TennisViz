@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tennis ViZ; Roozbeh Khodadadeh; CSE 578; 9-5-2018</title>
+    <link rel="stylesheet" type="text/css" href="css/main.css">
+    <script type="text/javascript" src="js/d3.js"></script>
+</head>
+<body>
+</body>
+<script>
+    function Node(name, firstServe, ace, doubleFault, firstPointWon, secPointWon, fastServe,
+    avgFirstServe, avgSecServe, bbreak, rreturn, total, winner, error, net) {
+        this.id = name;
+        this.FistServePct = firstServe;
+        this.Aces = ace;
+        this.DoubleFaults = doubleFault;
+        this.FirstPointWonPct = firstPointWon;
+        this.SecPointWonPct = secPointWon;
+        this.FastestServeSpd = fastServe;
+        this.AvgFirstServeSpd = avgFirstServe;
+        this.AvgSecServeSpd = avgSecServe;
+        this.BreakPointsPct = bbreak;
+        this.ReturnsWonPct = rreturn;
+        this.TotalPointsWon = total;
+        this.PointsWonNotReceived = winner;
+        this.Errors = error;
+        this.Nets = net;
+    }
+    
+    function Edge(source, target, rround, yyear) {
+        this.source = source;
+        this.target = target;
+        this.TourneyRound = rround;
+        this.TourneyYear = yyear;
+    }
+    
+    let leftChart = d3.select('body').append('svg')
+        .attr('width', 800)
+        .attr('height', 600)
+        .style('border', "1px solid black");
+    
+    let graph = {
+        'nodes' : [], 
+        'edges' : []
+    };
+
+
+    let raw = d3.csv("data.csv", d => {
+        graph.nodes.push(new Node(d['Player1'], d['Ace1'], d['Double1'],
+            d['firstPointWon1'], d['secPointWon1'], d['fastServe1'],
+            d['avgFirstServe1'], d['avgSecServe1'], d['Break1'],
+            d['Return1'], d['Total1'], d['Winner1'], d['Error1'],
+        d['Net1']));
+
+        graph.nodes.push(new Node(d['Player2'], d['Ace2'], d['Double2'],
+            d['firstPointWon2'], d['secPointWon2'], d['fastServe2'],
+            d['avgFirstServe2'], d['avgSecServe2'], d['Break2'],
+            d['Return2'], d['Total2'], d['Winner2'], d['Error2'],
+            d['Net2']));
+
+        graph.edges.push(new Edge(d['Player1'], d['Player2'], d['Round'], d['Year']))
+    });
+    console.log(graph);
+</script>
+</html>
