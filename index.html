@@ -5,24 +5,14 @@
     <title>Tennis ViZ; Roozbeh Khodadadeh; CSE 578; 9-5-2018</title>
     <link rel="stylesheet" type="text/css" href="css/main.css">
     <script type="text/javascript" src="js/d3.js"></script>
+    <script src="https://unpkg.com/d3-force-attract@latest"></script>
+    <script src="https://unpkg.com/d3-force-cluster@latest"></script>
 </head>
 <body>
-<select id ="tourney">
-    <option value="2004">2004</option>
-    <option value="2005">2005</option>
-    <option value="2006">2006</option>
-    <option value="2007">2007</option>
-    <option value="2008">2008</option>
-    <option value="2009">2009</option>
-    <option value="2010">2010</option>
-    <option value="2011">2011</option>
-    <option value="2012">2012</option>
-    <option value="2013">2013</option>
-    <option value="2014">2014</option>
-</select>
 <script type="text/javascript" src="globals.js"></script>
 <script>
     function drawEverything() {
+        d3.select("svg").remove();
         let z = d3.scaleOrdinal(d3.schemeAccent);
         let m = 7; //number of clusters
         let clusters = d3.range(0, 7).map(c => {
@@ -101,7 +91,15 @@
             .force("link", d3.forceLink().id(d => d.id).distance(0.1).strength(.001))
             .force("charge", d3.forceManyBody().strength(1))
             .force("center", d3.forceCenter(leftChartWidth / 2, leftChartHeight / 2))
-            .force("cluster", cluster().strength(.08))
+            .force('attract', d3.forceAttract()
+               .target([leftChartWidth/2, leftChartHeight/2])
+               .strength(0.01))
+            .force('cluster', d3.forceCluster()
+               .centers(function (d) { return clusters[d.cluster]; })
+               .strength(0.5)
+               .centerInertia(0.6))
+
+            //.force("cluster", cluster().strength(.08))
             .force('collide', d3.forceCollide(d => d.radius + 5).strength(0.9));
 
         simulation.nodes(graph.nodes)
@@ -128,19 +126,21 @@
 
         function filterTourney() {
             let value = this.value;
-            d3.selectAll("text").style("opacity", 0);
-            d3.selectAll(".links")
-                .filter(d => d.tourneyYear !== value)
-                .style("opacity", 0);
-            d3.selectAll("circle").style("opacity", 0);
+            let ecollection = graph.edges.filter(x => x.tourneyYear === value);
+            let n1c = [...(new Set(ecollection.map(x => x.source.id)))];
+            let n2c = [...(new Set(ecollection.map(x => x.target.id)))];
+            let nc = [...(new Set(n1c.concat(n2c)))];
+            let ncollection = graph.nodes.filter(x => nc.includes(x.id));
 
-            let tgames = d3.selectAll(".links")
-                .filter(d => d.tourneyYear === value)
-                .style("opacity", 1);
-            let circles = d3.selectAll("circle");
-            tgames.each(g =>
-                circles.filter(d => d.id === g.source.id || d.id === g.target.id)
-                .style("opacity", 1));
+            link = d3.selectAll(".links")
+                .data(ecollection);
+            node = d3.selectAll("circle")
+                .data(ncollection);
+
+            link.exit().remove();
+            node.exit().remove();
+            d3.select("select").attr("disabled","disabled");
+
         }
         // Move d to be adjacent to the cluster node.
         // from: https://bl.ocks.org/mbostock/7881887
@@ -211,6 +211,28 @@
 
         }
     }
+
+    //controls
+    function registerControls() {
+        let trange = d3.range(2003, 2015);
+        let sel = d3.select("body")
+            .append("select")
+            .attr("id","tourney")
+            .selectAll("option")
+            .data(trange)
+            .enter()
+            .append("option")
+            .attr("value", d => d)
+            .text(d => d);
+        d3.select("body").append("button")
+            .attr("id","reset").text("Reset")
+            .on("click", () => {
+                d3.select("select").attr("disabled", null);
+                drawEverything()
+            });
+
+    }
+
     /*
       __  __          _____ _   _
      |  \/  |   /\   |_   _| \ | |
@@ -242,7 +264,8 @@
             ed.gameNo += 1;
 
         graph.edges.push(ed);
-    })).then(drawEverything);
+    })).then(registerControls)
+        .then(drawEverything);
 
 </script>
 </body>
