@@ -7,60 +7,243 @@
     <script type="text/javascript" src="js/d3.js"></script>
 </head>
 <body>
-</body>
+<select id ="tourney">
+    <option value="2004">2004</option>
+    <option value="2005">2005</option>
+    <option value="2006">2006</option>
+    <option value="2007">2007</option>
+    <option value="2008">2008</option>
+    <option value="2009">2009</option>
+    <option value="2010">2010</option>
+    <option value="2011">2011</option>
+    <option value="2012">2012</option>
+    <option value="2013">2013</option>
+    <option value="2014">2014</option>
+</select>
+<script type="text/javascript" src="globals.js"></script>
 <script>
-    function Node(name, firstServe, ace, doubleFault, firstPointWon, secPointWon, fastServe,
-    avgFirstServe, avgSecServe, bbreak, rreturn, total, winner, error, net) {
-        this.id = name;
-        this.FistServePct = firstServe;
-        this.Aces = ace;
-        this.DoubleFaults = doubleFault;
-        this.FirstPointWonPct = firstPointWon;
-        this.SecPointWonPct = secPointWon;
-        this.FastestServeSpd = fastServe;
-        this.AvgFirstServeSpd = avgFirstServe;
-        this.AvgSecServeSpd = avgSecServe;
-        this.BreakPointsPct = bbreak;
-        this.ReturnsWonPct = rreturn;
-        this.TotalPointsWon = total;
-        this.PointsWonNotReceived = winner;
-        this.Errors = error;
-        this.Nets = net;
+    function drawEverything() {
+        let z = d3.scaleOrdinal(d3.schemeAccent);
+        let m = 7; //number of clusters
+        let clusters = d3.range(0, 7).map(c => {
+            return {
+                r: 100,
+                x: Math.cos(c / m * 2 * Math.PI) * 400 + leftChartWidth / 2 + Math.random(),
+                y: Math.sin(c / m * 2 * Math.PI) * 400 + leftChartHeight / 2 + Math.random()
+            };
+        });
+
+        graph.nodes
+            .forEach(n => {
+                n.cluster = Math.floor(playerData.get(n.id).wins / 10);
+                n.radius = (playerData.get(n.id).hero  + 1) * 10;
+            });
+
+        //D3
+        let leftChart = d3.select('body').append('svg')
+            .attr('width', leftChartWidth)
+            .attr('height', leftChartHeight)
+            .style('border', "1px solid black")
+            .on('click', () => {
+                d3.selectAll("circle").style('opacity', 1);
+                d3.selectAll(".links")
+                    .style('stroke-width', 1)
+                    .style('opacity', .2);
+                d3.selectAll("text")
+                    .style("visibility", "hidden");
+            });
+
+        var link = leftChart.append("g")
+            .selectAll(".links")
+            .data(graph.edges)
+            .enter()
+            .append("path")
+            .attr("class", "links")
+            .attr("stroke-width", "1px")
+            .attr("fill","none")
+            .attr("stroke", "lightgray");
+
+        var node = leftChart.append("g")
+            .attr("class", "nodes")
+            .selectAll("circle")
+            .data(graph.nodes)
+            .enter().append("circle")
+            .attr("r", d => d.radius)
+            .attr('fill', d => z(d.cluster))
+            .on("mouseover", click)
+            .call(d3.drag()
+                .on("start", d => {
+                    if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+                    d.fx = d3.event.subject.x;
+                    d.fy = d3.event.subject.y;
+                })
+                .on("drag", d => {
+                    d.fx = d3.event.x;
+                    d.fy = d3.event.y;
+                })
+                .on("end", d => {
+                    if (!d3.event.active) simulation.alphaTarget(0);
+                    d.fx = null;
+                    d.fy = null;
+                }));
+
+        let labels = leftChart.append("g")
+            .attr("class","labels")
+            .selectAll("text")
+            .data(graph.nodes)
+            .enter().append('text')
+            .attr("dx", 14)
+            .attr("dy", ".4em")
+            .style("visibility", "hidden")
+            .text(d => d.id + "(" + d.country +")");
+
+        let simulation = d3.forceSimulation()
+            .force("link", d3.forceLink().id(d => d.id).distance(0.1).strength(.001))
+            .force("charge", d3.forceManyBody().strength(1))
+            .force("center", d3.forceCenter(leftChartWidth / 2, leftChartHeight / 2))
+            .force("cluster", cluster().strength(.08))
+            .force('collide', d3.forceCollide(d => d.radius + 5).strength(0.9));
+
+        simulation.nodes(graph.nodes)
+            .on("tick", () => {
+                link.attr("d", d => {
+                    let dx = d.target.x - d.source.x,
+                        dy = d.target.y - d.source.y,
+                        dr = Math.sqrt(dx * dx + dy * dy)*(d.gameNo-1);
+                    return "M" + d.source.x + "," + d.source.y + "A" + dr + ","
+                        + dr + " 0 0,1 " + d.target.x + "," + d.target.y;
+                });
+
+                node.attr("cx", d => d.x)
+                    .attr("cy", d => d.y)
+                    .attr("r", d => d.radius);
+
+                labels.attr("x", d => d.x)
+                    .attr("y", d => d.y)
+            });
+
+        simulation.force("link").links(graph.edges);
+
+        d3.select("#tourney").on("change", filterTourney);
+
+        function filterTourney() {
+            let value = this.value;
+            d3.selectAll("text").style("opacity", 0);
+            d3.selectAll(".links")
+                .filter(d => d.tourneyYear !== value)
+                .style("opacity", 0);
+            d3.selectAll("circle").style("opacity", 0);
+
+            let tgames = d3.selectAll(".links")
+                .filter(d => d.tourneyYear === value)
+                .style("opacity", 1);
+            let circles = d3.selectAll("circle");
+            tgames.each(g =>
+                circles.filter(d => d.id === g.source.id || d.id === g.target.id)
+                .style("opacity", 1));
+        }
+        // Move d to be adjacent to the cluster node.
+        // from: https://bl.ocks.org/mbostock/7881887
+        function cluster() {
+            let nodes,
+                strength = 0.1;
+
+            function force (alpha) {
+
+                // scale + curve alpha value
+                alpha *= strength * alpha;
+
+                nodes.forEach(function(d) {
+                    let cluster = clusters[d.cluster];
+                    //if (cluster === d) return;
+
+                    let x = d.x - cluster.x,
+                        y = d.y - cluster.y,
+                        l = Math.sqrt(x * x + y * y),
+                        r = d.radius + cluster.r;
+
+                    if (l !== r) {
+                        l = (l - r) / l * alpha;
+                        d.x -= x * l;
+                        d.y -= y * l;
+                    }
+                });
+            }
+
+            force.initialize = function (_) {
+                nodes = _;
+            };
+
+            force.strength = _ => {
+                strength = _ == null ? strength : _;
+                return force;
+            };
+
+            return force;
+        }
+
+        function click(d) {
+            d3.event.stopPropagation();
+            d3.selectAll("circle")
+                .style('opacity', 0.2);
+            d3.selectAll(".links")
+                .style('opacity', .2)
+                .style('stroke','lightgray')
+                .style('stroke-width', 1);
+            d3.selectAll("text").style("visibility","hidden");
+
+            let connected = d3.selectAll(".links")
+                .filter(x => x.source.id === d.id || x.target.id === d.id);
+
+            connected.style('stroke','black')
+                .style('stroke-width', 2)
+                .style('opacity', 1);
+            connected.each(br => {
+                d3.selectAll("circle").filter(x => x.id === br.source.id ||
+                    x.id === br.target.id)
+                    .style('opacity', 1);
+
+                d3.selectAll("text").filter(x => x.id === br.source.id ||
+                    x.id === br.target.id)
+                    .style('visibility', "visible");
+
+            });
+
+        }
     }
-    
-    function Edge(source, target, rround, yyear) {
-        this.source = source;
-        this.target = target;
-        this.TourneyRound = rround;
-        this.TourneyYear = yyear;
-    }
-    
-    let leftChart = d3.select('body').append('svg')
-        .attr('width', 800)
-        .attr('height', 600)
-        .style('border', "1px solid black");
-    
-    let graph = {
-        'nodes' : [], 
-        'edges' : []
-    };
+    /*
+      __  __          _____ _   _
+     |  \/  |   /\   |_   _| \ | |
+     | \  / |  /  \    | | |  \| |
+     | |\/| | / /\ \   | | | . ` |
+     | |  | |/ ____ \ _| |_| |\  |
+     |_|  |_/_/    \_\_____|_| \_|
+        */
+    var proxyUrl = 'https://cors-anywhere.herokuapp.com/',
+        targetUrl = 'https://sites.google.com/a/asu.edu/cse-578-fall-2018/homework/hw-2-d3-programming/10yearAUSOpenMatches.csv?attredirects=0&d=1'
+    d3.csv("data.csv").then(data => data.forEach( d => {
+        let ed = new Edge(d['player1'], d['player2'], d['round'], d['year']);
 
+        if(playerData.get(d['player1']) === undefined) {
+            graph.nodes.push(new Node(d['player1'], d['country1']));
+            playerData.set(d['player1'], new PlayerStats());
+            updateStats(playerData.get(d['player1']),d , 1);
+        } else
+            updateStats(playerData.get(d['player1']),d , 1);
 
-    let raw = d3.csv("data.csv", d => {
-        graph.nodes.push(new Node(d['Player1'], d['Ace1'], d['Double1'],
-            d['firstPointWon1'], d['secPointWon1'], d['fastServe1'],
-            d['avgFirstServe1'], d['avgSecServe1'], d['Break1'],
-            d['Return1'], d['Total1'], d['Winner1'], d['Error1'],
-        d['Net1']));
+        if(playerData.get(d['player2']) === undefined) {
+            graph.nodes.push(new Node(d['player2'], d['country2']));
+            playerData.set(d['player2'], new PlayerStats());
+            updateStats(playerData.get(d['player2']),d , 2);
+        } else
+            updateStats(playerData.get(d['player2']),d , 2);
 
-        graph.nodes.push(new Node(d['Player2'], d['Ace2'], d['Double2'],
-            d['firstPointWon2'], d['secPointWon2'], d['fastServe2'],
-            d['avgFirstServe2'], d['avgSecServe2'], d['Break2'],
-            d['Return2'], d['Total2'], d['Winner2'], d['Error2'],
-            d['Net2']));
+        if(graph.edges.some(ex => ex.source === ed.source && ex.target === ed.target))
+            ed.gameNo += 1;
 
-        graph.edges.push(new Edge(d['Player1'], d['Player2'], d['Round'], d['Year']))
-    });
-    console.log(graph);
+        graph.edges.push(ed);
+    })).then(drawEverything);
+
 </script>
+</body>
 </html>
