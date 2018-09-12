@@ -139,47 +139,8 @@
 
             link.exit().remove();
             node.exit().remove();
+            simulation.alphaTarget(.02).restart();
             d3.select("select").attr("disabled","disabled");
-
-        }
-        // Move d to be adjacent to the cluster node.
-        // from: https://bl.ocks.org/mbostock/7881887
-        function cluster() {
-            let nodes,
-                strength = 0.1;
-
-            function force (alpha) {
-
-                // scale + curve alpha value
-                alpha *= strength * alpha;
-
-                nodes.forEach(function(d) {
-                    let cluster = clusters[d.cluster];
-                    //if (cluster === d) return;
-
-                    let x = d.x - cluster.x,
-                        y = d.y - cluster.y,
-                        l = Math.sqrt(x * x + y * y),
-                        r = d.radius + cluster.r;
-
-                    if (l !== r) {
-                        l = (l - r) / l * alpha;
-                        d.x -= x * l;
-                        d.y -= y * l;
-                    }
-                });
-            }
-
-            force.initialize = function (_) {
-                nodes = _;
-            };
-
-            force.strength = _ => {
-                strength = _ == null ? strength : _;
-                return force;
-            };
-
-            return force;
         }
 
         function click(d) {
@@ -208,8 +169,32 @@
                     .style('visibility', "visible");
 
             });
-
         }
+
+    }
+
+    //Second chart
+    function drawDetail() {
+        for(let v of playerData.values()) {
+            for(let p of Object.getOwnPropertyNames(v)) {
+                if(!summary.dims[p]) summary.dims[p] = [];
+                if(p === "hero" || p === "wins")
+                    summary.dims[p].push(v[p]);
+                else summary.dims[p] = summary.dims[p].concat(v[p].filter(x => x === 0 ? true : Boolean(x)));
+            }
+        }
+        for(let p of Object.getOwnPropertyNames(summary.dims)) {
+            summary.dims[p].sort();
+            summary.stats.average[p] = d3.sum(summary.dims[p])/summary.dims[p].length;
+            let dimlen = summary.dims[p].length;
+            summary.stats.median[p] = dimlen % 2 === 1 ? summary.dims[p][Math.floor(dimlen / 2)] :
+                (summary.dims[p][Math.floor(dimlen / 2)] + summary.dims[p][Math.floor(dimlen / 2) -1]) / 2;
+            summary.stats.maximum[p] = d3.max(summary.dims[p]);
+            summary.stats.minimum[p] = d3.min(summary.dims[p]);
+            summary.stats.extent[p] = d3.extent(summary.dims[p]);
+        }
+        console.log(summary);
+        //let x = d3.scaleOrdinal().domain()
     }
 
     //controls
@@ -243,29 +228,32 @@
         */
     var proxyUrl = 'https://cors-anywhere.herokuapp.com/',
         targetUrl = 'https://sites.google.com/a/asu.edu/cse-578-fall-2018/homework/hw-2-d3-programming/10yearAUSOpenMatches.csv?attredirects=0&d=1'
-    d3.csv("data.csv").then(data => data.forEach( d => {
-        let ed = new Edge(d['player1'], d['player2'], d['round'], d['year']);
+    d3.csv("data.csv").then(data => {
+        data.forEach( d => {
+            let ed = new Edge(d['player1'], d['player2'], d['round'], d['year']);
 
-        if(playerData.get(d['player1']) === undefined) {
-            graph.nodes.push(new Node(d['player1'], d['country1']));
-            playerData.set(d['player1'], new PlayerStats());
-            updateStats(playerData.get(d['player1']),d , 1);
-        } else
-            updateStats(playerData.get(d['player1']),d , 1);
+            if(playerData.get(d['player1']) === undefined) {
+                graph.nodes.push(new Node(d['player1'], d['country1']));
+                playerData.set(d['player1'], new PlayerStats());
+                updateStats(playerData.get(d['player1']),d , 1);
+            } else
+                updateStats(playerData.get(d['player1']),d , 1);
 
-        if(playerData.get(d['player2']) === undefined) {
-            graph.nodes.push(new Node(d['player2'], d['country2']));
-            playerData.set(d['player2'], new PlayerStats());
-            updateStats(playerData.get(d['player2']),d , 2);
-        } else
-            updateStats(playerData.get(d['player2']),d , 2);
+            if(playerData.get(d['player2']) === undefined) {
+                graph.nodes.push(new Node(d['player2'], d['country2']));
+                playerData.set(d['player2'], new PlayerStats());
+                updateStats(playerData.get(d['player2']),d , 2);
+            } else
+                updateStats(playerData.get(d['player2']),d , 2);
 
-        if(graph.edges.some(ex => ex.source === ed.source && ex.target === ed.target))
-            ed.gameNo += 1;
+            if(graph.edges.some(ex => ex.source === ed.source && ex.target === ed.target))
+                ed.gameNo += 1;
 
-        graph.edges.push(ed);
-    })).then(registerControls)
-        .then(drawEverything);
+            graph.edges.push(ed);
+        })
+    }).then(registerControls)
+        .then(drawEverything)
+        .then(drawDetail);
 
 </script>
 </body>

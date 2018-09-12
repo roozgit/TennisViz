@@ -1,5 +1,8 @@
 let leftChartWidth = 800;
 let leftChartHeight = 800;
+let rightChartWidth = 800;
+let rightChartHeight = 800;
+let summary = {dims : {}, stats : {average:{}, median : {}, maximum:{}, minimum:{}, extent:{}}};
 
 function Node(name, country) {
     this.id = name;
@@ -32,26 +35,26 @@ function PlayerStats() {
     this.totalPointsWon = [];
     this.pointsWonNotReceived = [];
     this.errors = [];
-    this.nets = [];
+    this.netsPct = [];
 }
 
 let playerData = new Map();
 
 function updateStats(playerStat, stat, no) {
-    playerStat.firstServePct.push(parseInt(stat['firstServe' + no].slice(0, -1)) / 100);
-    playerStat.aces.push(stat['ace' + no]);
-    playerStat.doubleFaults.push(stat['double' + no]);
-    playerStat.firstPointWonPct.push(stat['firstPointWon' + no]);
-    playerStat.secPointWonPct.push(stat['secPointWon' + no]);
-    playerStat.fastestServeSpd.push(stat['fastServe' + no]);
-    playerStat.avgFirstServeSpd.push(stat['avgFirstServe' + no]);
-    playerStat.avgSecServeSpd.push(stat['avgSecServe' + no]);
-    playerStat.breakPointsPct.push(stat['break' + no]);
-    playerStat.returnsWonPct.push(stat['return' + no]);
-    playerStat.totalPointsWon.push(stat['total' + no]);
-    playerStat.pointsWonNotReceived.push(stat['winner' + no]);
-    playerStat.errors.push(stat['error' + no]);
-    playerStat.nets.push(stat['net' + no]);
+    playerStat.firstServePct.push(parseInt(stat['firstServe' + no].slice(0, -1)));
+    playerStat.aces.push(parseInt(stat['ace' + no]));
+    playerStat.doubleFaults.push(parseInt(stat['double' + no]));
+    playerStat.firstPointWonPct.push(parseInt(stat['firstPointWon' + no].slice(0,-1)));
+    playerStat.secPointWonPct.push(parseInt(stat['secPointWon' + no].slice(0, -1)));
+    playerStat.fastestServeSpd.push(parseInt(stat['fastServe' + no]));
+    playerStat.avgFirstServeSpd.push(parseInt(stat['avgFirstServe' + no]));
+    playerStat.avgSecServeSpd.push(parseInt(stat['avgSecServe' + no]));
+    playerStat.breakPointsPct.push(parseInt(stat['break' + no].slice(0, -1)));
+    playerStat.returnsWonPct.push(parseInt(stat['return' + no].slice(0, -1)));
+    playerStat.totalPointsWon.push(parseInt(stat['total' + no]));
+    playerStat.pointsWonNotReceived.push(parseInt(stat['winner' + no]));
+    playerStat.errors.push(parseInt(stat['error' + no]));
+    playerStat.netsPct.push(parseInt(stat['net' + no].slice(0, -1)));
 
     if(stat['round'] === "Final" && no === 1) playerStat.hero += 1;
     if(no === 1) playerStat.wins += 1;
