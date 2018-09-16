@@ -1,8 +1,13 @@
-let leftChartWidth = 800;
-let leftChartHeight = 800;
-let rightChartWidth = 800;
-let rightChartHeight = 800;
-let summary = {dims : {}, stats : {average:{}, median : {}, maximum:{}, minimum:{}, extent:{}}};
+let leftChartWidth = 900;
+let leftChartHeight = 600;
+let rightChartWidth = 650;
+let rightChartHeight = 180;
+let rightChartHeight2 = 180;
+let rightChartHeight3 = 180;
+let margin = {top: 20, right: 20, bottom: 50, left: 55};
+let scales = {speedScales: {}, percentScales: {}, pointScales:{}};
+
+let summary = {dims : {}, stats : {average: {}, median: {}, maximum: {}, minimum: {}, extent: {}}};
 
 function Node(name, country) {
     this.id = name;
@@ -11,30 +16,37 @@ function Node(name, country) {
     this.radius = 10;
 }
 
-function Edge(source, target, rround, yyear) {
+function Edge(source, target, rround, yyear, setInfo) {
     this.source = source;
     this.target = target;
     this.tourneyRound = rround;
     this.tourneyYear = yyear;
+    this.setInfo = setInfo;
     this.gameNo = 1;
 }
 
 function PlayerStats() {
     this.hero = 0;
     this.wins = 0;
-    this.firstServePct = [];
-    this.aces = [];
-    this.doubleFaults = [];
-    this.firstPointWonPct = [];
-    this.secPointWonPct = [];
-    this.fastestServeSpd = [];
+
+    //serve speed types
     this.avgFirstServeSpd = [];
     this.avgSecServeSpd = [];
-    this.breakPointsPct = [];
-    this.returnsWonPct = [];
-    this.totalPointsWon = [];
+    this.fastestServeSpd = [];
+
+    //point types
+    this.aces = [];
+    this.doubleFaults = [];
     this.pointsWonNotReceived = [];
     this.errors = [];
+    this.totalPointsWon = [];
+
+    //Percentage types
+    this.firstServePct = [];
+    this.firstPointWonPct = [];
+    this.secPointWonPct = [];
+    this.breakPointsPct = [];
+    this.returnsWonPct = [];
     this.netsPct = [];
 }
 

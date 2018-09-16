@@ -5,65 +5,110 @@
     <title>Tennis ViZ; Roozbeh Khodadadeh; CSE 578; 9-5-2018</title>
     <link rel="stylesheet" type="text/css" href="css/main.css">
     <script type="text/javascript" src="js/d3.js"></script>
-    <script src="https://unpkg.com/d3-force-attract@latest"></script>
-    <script src="https://unpkg.com/d3-force-cluster@latest"></script>
+    <script type="text/javascript" src="js/forceAttract.js"></script>
+    <script type="text/javascript" src="js/forceCluster.js"></script>
 </head>
 <body>
+
+<div class="colu">
+    <div class="leftSide"><h1>Overview of Players for AUS OPEN from 2004 to 2014</h1>
+        <p id="gameInfo">Circles represent players. Stars represent winning the cup.
+            Click on a player to see their games and their stats compared to others.
+            Link colors represent the round of the tournament.</p></div>
+    <div class="rightSide"><h1>Player Statistics Compared to All other Players.</h1></div>
+</div>
+
 <script type="text/javascript" src="globals.js"></script>
 <script>
     function drawEverything() {
-        d3.select("svg").remove();
-        let z = d3.scaleOrdinal(d3.schemeAccent);
-        let m = 7; //number of clusters
-        let clusters = d3.range(0, 7).map(c => {
-            return {
-                r: 100,
-                x: Math.cos(c / m * 2 * Math.PI) * 400 + leftChartWidth / 2 + Math.random(),
-                y: Math.sin(c / m * 2 * Math.PI) * 400 + leftChartHeight / 2 + Math.random()
-            };
-        });
+        d3.select("#graph").remove();
+        let z = d3.scaleOrdinal(d3.schemeOrRd[7]);
+        let clusters = {
+            0: {x: leftChartWidth/2, y: leftChartHeight/2},
+            1: {x: leftChartWidth/4, y: leftChartHeight/2},
+            2: {x: 3*leftChartWidth/4, y: leftChartHeight/2+50},
+            3: {x: 3*leftChartWidth/4, y: leftChartHeight/4},
+            4: {x: leftChartWidth/4, y: 3*leftChartHeight/4},
+            5: {x: 5, y: 5},
+            6: {x: 3*leftChartWidth/4, y: 2*leftChartHeight/3}
+        };
 
         graph.nodes
             .forEach(n => {
-                n.cluster = Math.floor(playerData.get(n.id).wins / 10);
-                n.radius = (playerData.get(n.id).hero  + 1) * 10;
+                n.cluster =
+                    //playerData.get(n.id).hero;
+                    Math.floor(playerData.get(n.id).wins / 10);
+                n.radius = playerData.get(n.id).wins+7;
+                //(playerData.get(n.id).hero) * 10 + 15;
+                n.x = n.cluster.x + Math.random();
+                n.y = n.cluster.y + Math.random();
             });
 
         //D3
-        let leftChart = d3.select('body').append('svg')
+
+        let leftChart = d3.select('div .leftSide').append('svg')
+            .attr("id","graph")
             .attr('width', leftChartWidth)
             .attr('height', leftChartHeight)
             .style('border', "1px solid black")
             .on('click', () => {
-                d3.selectAll("circle").style('opacity', 1);
-                d3.selectAll(".links")
-                    .style('stroke-width', 1)
-                    .style('opacity', .2);
-                d3.selectAll("text")
+                //clear already drawn points
+                d3.selectAll("g#playerSpeedDist").remove();
+                d3.selectAll("g#playerPercentageDist").remove();
+                d3.selectAll("g#playerPointDist").remove();
+                d3.selectAll("#graph circle").style('opacity', 1);
+                d3.selectAll(".links").style("visibility","hidden");
+                d3.selectAll("#edges").lower();
+                d3.selectAll("#graph text.labels")
                     .style("visibility", "hidden");
+                d3.select("#gameInfo").text("Select a player");
             });
 
+        addLegends();
+
         var link = leftChart.append("g")
+            .attr("id","edges")
             .selectAll(".links")
             .data(graph.edges)
             .enter()
             .append("path")
             .attr("class", "links")
-            .attr("stroke-width", "1px")
+            .attr("stroke-width", "5px")
             .attr("fill","none")
-            .attr("stroke", "lightgray");
+            .attr("stroke", d => z(d.tourneyRound))
+            .style("visibility", "hidden")
+            .on("mouseover",d => {
+                d3.select("#gameInfo")
+                    .text("Year " + d.tourneyYear +
+                        ", Round: " + d.tourneyRound +
+                        ", Winner: " + d.source.id +
+                        "{" + d.setInfo + "}")
+            });
+
+        let labels = leftChart.append("g")
+            .attr("class","labels")
+            .selectAll("text")
+            .data(graph.nodes)
+            .enter().append("text")
+            .attr("dx", d => 5 + d.radius)
+            .attr("dy", ".2em")
+            .attr("class","labels")
+            .attr("pointer-events", "none")
+            .style("visibility", "hidden")
+            .text(d => d.id + "(" + d.country +")");
 
         var node = leftChart.append("g")
             .attr("class", "nodes")
-            .selectAll("circle")
+            .selectAll("#graph circle")
             .data(graph.nodes)
             .enter().append("circle")
             .attr("r", d => d.radius)
-            .attr('fill', d => z(d.cluster))
-            .on("mouseover", click)
+            .attr('fill', "darkblue")
+            .on("click", click)
             .call(d3.drag()
                 .on("start", d => {
-                    if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+                    //d3.selectAll(".links").style("visibility","hidden");
+                    if (!d3.event.active) simulation.alphaTarget(0.03).restart();
                     d.fx = d3.event.subject.x;
                     d.fy = d3.event.subject.y;
                 })
@@ -77,30 +122,34 @@
                     d.fy = null;
                 }));
 
-        let labels = leftChart.append("g")
-            .attr("class","labels")
-            .selectAll("text")
-            .data(graph.nodes)
+        let heroLabels = leftChart.append("g")
+            .attr("class","heroLabels")
+            .selectAll("text.heroLabels")
+            .data(graph.nodes.filter(x => playerData.get(x.id).hero > 0))
             .enter().append('text')
-            .attr("dx", 14)
-            .attr("dy", ".4em")
-            .style("visibility", "hidden")
-            .text(d => d.id + "(" + d.country +")");
+            .attr("dx", -10)
+            .attr("dy", -5)
+            .attr("class","heroLabels")
+            .attr("pointer-events", "none")
+            .attr("font-size", 16)
+            .style("stroke", "white")
+            .html(d => "&#x2605;".repeat(playerData.get(d.id).hero));
+
+        d3.select("#tourney").on("change", null);
+        d3.select("#tourney").on("change", filterTourney);
 
         let simulation = d3.forceSimulation()
             .force("link", d3.forceLink().id(d => d.id).distance(0.1).strength(.001))
-            .force("charge", d3.forceManyBody().strength(1))
+            .force("charge", d3.forceManyBody().strength(-5.7))
             .force("center", d3.forceCenter(leftChartWidth / 2, leftChartHeight / 2))
             .force('attract', d3.forceAttract()
                .target([leftChartWidth/2, leftChartHeight/2])
                .strength(0.01))
             .force('cluster', d3.forceCluster()
                .centers(function (d) { return clusters[d.cluster]; })
-               .strength(0.5)
-               .centerInertia(0.6))
-
-            //.force("cluster", cluster().strength(.08))
-            .force('collide', d3.forceCollide(d => d.radius + 5).strength(0.9));
+               .strength(.9)
+               .centerInertia(0.9))
+            .force('collide', d3.forceCollide(d => d.radius + 5).strength(0.1));
 
         simulation.nodes(graph.nodes)
             .on("tick", () => {
@@ -117,12 +166,141 @@
                     .attr("r", d => d.radius);
 
                 labels.attr("x", d => d.x)
+                    .attr("y", d => d.y);
+
+                heroLabels.attr("x", d => d.x)
                     .attr("y", d => d.y)
             });
 
         simulation.force("link").links(graph.edges);
 
-        d3.select("#tourney").on("change", filterTourney);
+        function click(d) {
+            d3.event.stopPropagation();
+            d3.selectAll("circle")
+                .style('opacity', 0.2);
+            d3.selectAll(".links")
+                .style("visibility", "hidden");
+            d3.selectAll("#graph text.labels").style("visibility", "hidden");
+
+            let connected = d3.selectAll(".links")
+                .filter(x => x.source.id === d.id || x.target.id === d.id);
+
+            // connected.attr("d", d => {
+            //     let dx = d.target.x - d.source.x,
+            //         dy = d.target.y - d.source.y,
+            //         dr = Math.sqrt(dx * dx + dy * dy)*(d.gameNo-1);
+            //     return "M" + d.source.x + "," + d.source.y + "A" + dr + ","
+            //         + dr + " 0 0,1 " + d.target.x + "," + d.target.y;
+            // });
+            connected.style("visibility", null);
+            d3.select("#edges").raise();
+
+            connected.each(br => {
+                d3.selectAll("circle").filter(x =>
+                    x.id === br.source.id || x.id === br.target.id)
+                    .style('opacity', 1);
+
+                d3.selectAll("#graph text.labels").filter(x => x.id === br.source.id ||
+                    x.id === br.target.id)
+                    .style('visibility', "visible");
+            });
+            drawDistribution(d);
+        }
+
+        function drawDistribution(pdata) {
+            //clear already drawn points
+            d3.selectAll("g#playerSpeedDist").remove();
+            d3.selectAll("g#playerPercentageDist").remove();
+            d3.selectAll("g#playerPointDist").remove();
+
+            //create data entries for D3
+            let speedCats = ["avgFirstServeSpd", "avgSecServeSpd", "fastestServeSpd"];
+            let percentageCats = ["firstServePct", "firstPointWonPct", "secPointWonPct",
+                "breakPointsPct", "returnsWonPct", "netsPct"];
+            let pointCats = ["aces", "doubleFaults", "pointsWonNotReceived",
+                "errors", "totalPointsWon"];
+
+            let speedDists = new Map();
+            let percentageDists = new Map();
+            let pointDists = new Map();
+            for(let cat of speedCats)
+                speedDists.set(cat, playerData.get(pdata.id)[cat]);
+
+            for(let cat of percentageCats)
+                percentageDists.set(cat, playerData.get(pdata.id)[cat]);
+
+            for(let cat of pointCats)
+                pointDists.set(cat, playerData.get(pdata.id)[cat]);
+
+            //Paint points on speed svg
+            let lineDists = d3.select("svg#summary")
+                .selectAll("g#playerSpeedDist")
+                .data([...speedDists]).enter()
+                .append("g")
+                .attr("transform",
+                    "translate(" + margin.left + "," + margin.top + ")")
+                .attr("id", "playerSpeedDist");
+
+            lineDists.selectAll("circle")
+            .data(d => {
+                let circData = [];
+                for(let i=0; i < d[1].length; i++)
+                    if(!isNaN(d[1][i]))
+                        circData.push({x: d[0], y: d[1][i]});
+                return circData;
+            }).enter()
+                .append("circle")
+                .attr("cx", d => scales.speedScales.xs(d.x))
+                .attr("cy", d => scales.speedScales.ys(d.y))
+                .attr("r", 2)
+                .attr("fill", "blue");
+
+            //Paint points on percentage svg
+            let linePercentageDists = d3.select("svg#summary2")
+                .selectAll("g#playerPercentageDist")
+                .data([...percentageDists]).enter()
+                .append("g")
+                .attr("transform",
+                    "translate(" + margin.left + "," + margin.top + ")")
+                .attr("id", "playerPercentageDist");
+
+            linePercentageDists.selectAll("circle")
+                .data(d => {
+                    let circData = [];
+                    for(let i=0; i < d[1].length; i++)
+                        if(!isNaN(d[1][i]))
+                            circData.push({x: d[0], y: d[1][i]});
+                    return circData;
+                }).enter()
+                .append("circle")
+                .attr("cx", d => scales.percentScales.xs(d.x))
+                .attr("cy", d => scales.percentScales.ys(d.y))
+                .attr("r", 2)
+                .attr("fill", "blue");
+
+            //Paint points on point svg
+            let linePointDists = d3.select("svg#summary3")
+                .selectAll("g#playerPointDist")
+                .data([...pointDists]).enter()
+                .append("g")
+                .attr("transform",
+                    "translate(" + margin.left + "," + margin.top + ")")
+                .attr("id", "playerPointDist");
+
+            linePointDists.selectAll("circle")
+                .data(d => {
+                    let circData = [];
+                    for(let i=0; i < d[1].length; i++)
+                        if(!isNaN(d[1][i]))
+                            circData.push({x: d[0], y: d[1][i]});
+                    return circData;
+                }).enter()
+                .append("circle")
+                .attr("cx", d => scales.pointScales.xs(d.x))
+                .attr("cy", d => scales.pointScales.ys(d.y))
+                .attr("r", 2)
+                .attr("fill", "blue");
+        }
 
         function filterTourney() {
             let value = this.value;
@@ -132,43 +310,60 @@
             let nc = [...(new Set(n1c.concat(n2c)))];
             let ncollection = graph.nodes.filter(x => nc.includes(x.id));
 
+            link.style("visibility","hidden");
+            d3.selectAll("#graph text.labels")
+                .style("visibility", "hidden");
+            d3.selectAll("#graph circle")
+                .style("opacity", 1);
+
             link = d3.selectAll(".links")
                 .data(ecollection);
-            node = d3.selectAll("circle")
+            node = d3.selectAll("#graph circle")
                 .data(ncollection);
 
             link.exit().remove();
             node.exit().remove();
+            link.attr("stroke", d => z(d.tourneyRound));
+            //console.log(link.filter(d => d.tourneyRound === "Final").data()[0].source.id;
+            let hero = link.filter(d => d.tourneyRound === "Final").data()[0].source.id;
+            d3.select("#gameInfo").text("Winner: " + hero);
             simulation.alphaTarget(.02).restart();
             d3.select("select").attr("disabled","disabled");
         }
 
-        function click(d) {
-            d3.event.stopPropagation();
-            d3.selectAll("circle")
-                .style('opacity', 0.2);
-            d3.selectAll(".links")
-                .style('opacity', .2)
-                .style('stroke','lightgray')
-                .style('stroke-width', 1);
-            d3.selectAll("text").style("visibility","hidden");
-
-            let connected = d3.selectAll(".links")
-                .filter(x => x.source.id === d.id || x.target.id === d.id);
-
-            connected.style('stroke','black')
-                .style('stroke-width', 2)
-                .style('opacity', 1);
-            connected.each(br => {
-                d3.selectAll("circle").filter(x => x.id === br.source.id ||
-                    x.id === br.target.id)
-                    .style('opacity', 1);
-
-                d3.selectAll("text").filter(x => x.id === br.source.id ||
-                    x.id === br.target.id)
-                    .style('visibility', "visible");
-
-            });
+        function addLegends() {
+            let roundData = ["First", "Second", "Third", "Fourth", "quarter", "semi", "Final"];
+            let legendScale = d3.scalePoint().domain(roundData).range([0, 100]);
+            leftChart.append("g")
+                .attr("id", "legend")
+                .attr("transform", "translate(5, 15)")
+                .selectAll("line")
+                .data(roundData).enter()
+                .append("line")
+                .attr("x1", 0)
+                .attr("y1", d => legendScale(d))
+                .attr("x2", 30)
+                .attr("y2", d => legendScale(d))
+                .attr("stroke", d => z(d));
+            d3.select("#legend")
+                .selectAll("text")
+                .data(roundData).enter()
+                .append("text")
+                .attr("x", 35)
+                .attr("y", d => legendScale(d) + 3)
+                .text(d => d)
+                .on("click", d => {
+                    d3.event.stopPropagation();
+                    d3.selectAll(".links").style("visibility", "hidden");
+                    d3.selectAll(".links").filter(x => x.tourneyRound === d).attr("d", d => {
+                        let dx = d.target.x - d.source.x,
+                            dy = d.target.y - d.source.y,
+                            dr = Math.sqrt(dx * dx + dy * dy) * (d.gameNo - 1);
+                        return "M" + d.source.x + "," + d.source.y + "A" + dr + ","
+                            + dr + " 0 0,1 " + d.target.x + "," + d.target.y;
+                    }).style("visibility", null);
+                    d3.selectAll("#edges").raise();
+                });
         }
 
     }
@@ -193,15 +388,191 @@
             summary.stats.minimum[p] = d3.min(summary.dims[p]);
             summary.stats.extent[p] = d3.extent(summary.dims[p]);
         }
-        console.log(summary);
-        //let x = d3.scaleOrdinal().domain()
+
+        //Draw svg for speeds
+        let rightChart = d3.select('div.rightSide').append('svg')
+            .attr("id","summary")
+            .attr("width", rightChartWidth + margin.left + margin.right)
+            .attr("height", rightChartHeight + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform",
+                "translate(" + margin.left + "," + margin.top + ")");
+
+        //Draw svg for percentages
+        let rightChart2 = d3.select('div.rightSide').append('svg')
+            .attr("id","summary2")
+            .attr("width", rightChartWidth + margin.left + margin.right)
+            .attr("height", rightChartHeight2 + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform",
+                "translate(" + margin.left + "," + margin.top + ")");
+
+        //Draw svg for points
+        let rightChart3 = d3.select('div.rightSide').append('svg')
+            .attr("id","summary3")
+            .attr("width", rightChartWidth + margin.left + margin.right)
+            .attr("height", rightChartHeight3 + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform",
+                "translate(" + margin.left + "," + margin.top + ")");
+
+
+        //Draw speed boxes
+        let speedCats = ["avgFirstServeSpd", "avgSecServeSpd", "fastestServeSpd"];
+        let xspd = d3.scalePoint()
+            .domain(speedCats)
+            .range([50 , rightChartWidth - 50]).padding(.5);
+
+        let yspd = d3.scaleLinear()
+            .domain(d3.extent([].concat(summary.stats.extent['avgFirstServeSpd'])
+                .concat(summary.stats.extent['avgSecServeSpd'])
+                .concat(summary.stats.extent['fastestServeSpd'])))
+            .range([rightChartHeight, 0]);
+
+        scales.speedScales = {xs: xspd, ys: yspd};
+
+        rightChart.append("g")
+            .attr("transform", "translate(0," + rightChartHeight + ")")
+            .call(d3.axisBottom(xspd));
+
+        rightChart.append("g")
+            .call(d3.axisLeft(yspd));
+
+        rightChart.append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 0 - margin.left)
+            .attr("x",0 - (rightChartHeight / 2))
+            .attr("dy", "1em")
+            .style("text-anchor", "middle")
+            .text("Speed(Km/h)");
+
+        for(let sc of speedCats) {
+            rightChart.append("g")
+                .append("rect")
+                .attr("x", xspd(sc) - 25)
+                .attr("y", yspd(summary.stats.maximum[sc]))
+                .attr("height", -yspd(summary.stats.maximum[sc]) + yspd(summary.stats.minimum[sc]))
+                .attr("width", "50px")
+                .attr("stroke-width","1px")
+                .attr("stroke", "black")
+                .attr("fill", "none");
+            rightChart.append("g")
+                .append("line")
+                .attr("x1", xspd(sc) - 25)
+                .attr("y1", yspd(summary.stats.median[sc]))
+                .attr("x2", xspd(sc) + 25)
+                .attr("y2", yspd(summary.stats.median[sc]))
+                .attr("stroke","black");
+        }
+
+        //Draw percentage boxes
+        let percentageCats = ["firstServePct", "firstPointWonPct", "secPointWonPct",
+        "breakPointsPct", "returnsWonPct", "netsPct"];
+        let xspd2 = d3.scalePoint()
+            .domain(percentageCats)
+            .range([50 , rightChartWidth - 50]).padding(.5);
+
+        let yspd2 = d3.scaleLinear()
+            .domain(d3.extent([].concat(summary.stats.extent['firstServePct'])
+                .concat(summary.stats.extent['firstPointWonPct'])
+                .concat(summary.stats.extent['secPointWonPct'])
+                .concat(summary.stats.extent['breakPointsPct'])
+                .concat(summary.stats.extent['returnsWonPct'])
+                .concat(summary.stats.extent['netsPct'])))
+            .range([rightChartHeight2, 0]);
+
+        scales.percentScales = {xs: xspd2, ys: yspd2};
+
+        rightChart2.append("g")
+            .attr("transform", "translate(0," + rightChartHeight2 + ")")
+            .call(d3.axisBottom(xspd2));
+
+        rightChart2.append("g")
+            .call(d3.axisLeft(yspd2));
+        rightChart2.append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 0 - margin.left)
+            .attr("x",0 - (rightChartHeight / 2))
+            .attr("dy", "1em")
+            .style("text-anchor", "middle")
+            .text("Percentage");
+        for(let sc of percentageCats) {
+            rightChart2.append("g")
+                .append("rect")
+                .attr("x", xspd2(sc) - 25)
+                .attr("y", yspd2(summary.stats.maximum[sc]))
+                .attr("height", -yspd2(summary.stats.maximum[sc]) + yspd2(summary.stats.minimum[sc]))
+                .attr("width", "50px")
+                .attr("stroke-width","1px")
+                .attr("stroke", "black")
+                .attr("fill", "none");
+            rightChart2.append("g")
+                .append("line")
+                .attr("x1", xspd2(sc) - 25)
+                .attr("y1", yspd2(summary.stats.median[sc]))
+                .attr("x2", xspd2(sc) + 25)
+                .attr("y2", yspd2(summary.stats.median[sc]))
+                .attr("stroke","black");
+        }
+
+        //Draw point boxes
+        let pointCats = ["aces", "doubleFaults", "pointsWonNotReceived",
+            "errors", "totalPointsWon"];
+        let xspd3 = d3.scalePoint()
+            .domain(pointCats)
+            .range([50 , rightChartWidth - 50]).padding(.5);
+
+        let yspd3 = d3.scaleLinear()
+            .domain(d3.extent([].concat(summary.stats.extent['aces'])
+                .concat(summary.stats.extent['doubleFaults'])
+                .concat(summary.stats.extent['pointsWonNotReceived'])
+                .concat(summary.stats.extent['errors'])
+                .concat(summary.stats.extent['totalPointsWon'])))
+            .range([rightChartHeight3, 0]);
+
+        scales.pointScales = {xs: xspd3, ys: yspd3};
+
+        rightChart3.append("g")
+            .attr("transform", "translate(0," + rightChartHeight3 + ")")
+            .call(d3.axisBottom(xspd3));
+
+        rightChart3.append("g")
+            .call(d3.axisLeft(yspd3));
+        rightChart3.append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 0 - margin.left)
+            .attr("x",0 - (rightChartHeight / 2))
+            .attr("dy", "1em")
+            .style("text-anchor", "middle")
+            .text("Count");
+        for(let sc of pointCats) {
+            rightChart3.append("g")
+                .append("rect")
+                .attr("x", xspd3(sc) - 25)
+                .attr("y", yspd3(summary.stats.maximum[sc]))
+                .attr("height", -yspd3(summary.stats.maximum[sc]) + yspd3(summary.stats.minimum[sc]))
+                .attr("width", "50px")
+                .attr("stroke-width","1px")
+                .attr("stroke", "black")
+                .attr("fill", "none");
+            rightChart3.append("g")
+                .append("line")
+                .attr("x1", xspd3(sc) - 25)
+                .attr("y1", yspd3(summary.stats.median[sc]))
+                .attr("x2", xspd3(sc) + 25)
+                .attr("y2", yspd3(summary.stats.median[sc]))
+                .attr("stroke","black");
+        }
     }
 
     //controls
     function registerControls() {
         let trange = d3.range(2003, 2015);
-        let sel = d3.select("body")
+        let sel = d3.select(".leftSide")
             .append("select")
+            .style("position","relative")
+            //.style("left", "800px")
+            //.style("top",0)
             .attr("id","tourney")
             .selectAll("option")
             .data(trange)
@@ -209,13 +580,14 @@
             .append("option")
             .attr("value", d => d)
             .text(d => d);
-        d3.select("body").append("button")
+        d3.select(".leftSide").append("button")
+            .style("position","relative")
+            .style("margin-left","25px")
             .attr("id","reset").text("Reset")
             .on("click", () => {
                 d3.select("select").attr("disabled", null);
                 drawEverything()
             });
-
     }
 
     /*
@@ -228,9 +600,11 @@
         */
     var proxyUrl = 'https://cors-anywhere.herokuapp.com/',
         targetUrl = 'https://sites.google.com/a/asu.edu/cse-578-fall-2018/homework/hw-2-d3-programming/10yearAUSOpenMatches.csv?attredirects=0&d=1'
+    //If faced with CORS problem, replace "data.csv" with proxyUrl + targetUrl
     d3.csv("data.csv").then(data => {
         data.forEach( d => {
-            let ed = new Edge(d['player1'], d['player2'], d['round'], d['year']);
+            let ed = new Edge(d['player1'], d['player2']
+                , d['round'], d['year'], d['results']);
 
             if(playerData.get(d['player1']) === undefined) {
                 graph.nodes.push(new Node(d['player1'], d['country1']));
@@ -251,9 +625,9 @@
 
             graph.edges.push(ed);
         })
-    }).then(registerControls)
-        .then(drawEverything)
-        .then(drawDetail);
+    }).then(drawDetail)
+        .then(registerControls)
+        .then(drawEverything);
 
 </script>
 </body>
