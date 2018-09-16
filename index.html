@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <title>Tennis ViZ; Roozbeh Khodadadeh; CSE 578; 9-5-2018</title>
-    <link rel="stylesheet" type="text/css" href="css/main.css">
+    <style>.colu {
+        display: flex;
+    }</style>
     <script type="text/javascript" src="js/d3.js"></script>
     <script type="text/javascript" src="js/forceAttract.js"></script>
     <script type="text/javascript" src="js/forceCluster.js"></script>
@@ -136,7 +138,9 @@
             .html(d => "&#x2605;".repeat(playerData.get(d.id).hero));
 
         d3.select("#tourney").on("change", null);
+        d3.select("#player").on("change", null);
         d3.select("#tourney").on("change", filterTourney);
+        d3.select("#player").on("change", filterPlayer);
 
         let simulation = d3.forceSimulation()
             .force("link", d3.forceLink().id(d => d.id).distance(0.1).strength(.001))
@@ -331,6 +335,11 @@
             d3.select("select").attr("disabled","disabled");
         }
 
+        function filterPlayer() {
+            let nod = d3.selectAll("#graph circle").filter(x => x.id===this.value);
+             nod.call(d => click(d.data()[0]));
+        }
+
         function addLegends() {
             let roundData = ["First", "Second", "Third", "Fourth", "quarter", "semi", "Final"];
             let legendScale = d3.scalePoint().domain(roundData).range([0, 100]);
@@ -355,13 +364,14 @@
                 .on("click", d => {
                     d3.event.stopPropagation();
                     d3.selectAll(".links").style("visibility", "hidden");
-                    d3.selectAll(".links").filter(x => x.tourneyRound === d).attr("d", d => {
-                        let dx = d.target.x - d.source.x,
-                            dy = d.target.y - d.source.y,
-                            dr = Math.sqrt(dx * dx + dy * dy) * (d.gameNo - 1);
-                        return "M" + d.source.x + "," + d.source.y + "A" + dr + ","
-                            + dr + " 0 0,1 " + d.target.x + "," + d.target.y;
-                    }).style("visibility", null);
+                    d3.selectAll(".links").filter(x => x.tourneyRound === d)
+                        .attr("d", d => {
+                            let dx = d.target.x - d.source.x,
+                                dy = d.target.y - d.source.y,
+                                dr = Math.sqrt(dx * dx + dy * dy) * (d.gameNo - 1);
+                            return "M" + d.source.x + "," + d.source.y + "A" + dr + ","
+                                + dr + " 0 0,1 " + d.target.x + "," + d.target.y;
+                        }).style("visibility", null);
                     d3.selectAll("#edges").raise();
                 });
         }
@@ -369,7 +379,7 @@
     }
 
     //Second chart
-    function drawDetail() {
+    function drawDetail(dyear) {
         for(let v of playerData.values()) {
             for(let p of Object.getOwnPropertyNames(v)) {
                 if(!summary.dims[p]) summary.dims[p] = [];
@@ -568,11 +578,9 @@
     //controls
     function registerControls() {
         let trange = d3.range(2003, 2015);
-        let sel = d3.select(".leftSide")
+        d3.select(".leftSide")
             .append("select")
             .style("position","relative")
-            //.style("left", "800px")
-            //.style("top",0)
             .attr("id","tourney")
             .selectAll("option")
             .data(trange)
@@ -580,6 +588,19 @@
             .append("option")
             .attr("value", d => d)
             .text(d => d);
+
+        let psorted = [...playerData.keys()].sort();
+        d3.select(".leftSide")
+            .append("select")
+            .style("position","relative")
+            .attr("id","player")
+            .selectAll("option")
+            .data(psorted)
+            .enter()
+            .append("option")
+            .attr("value", d => d)
+            .text(d => d);
+
         d3.select(".leftSide").append("button")
             .style("position","relative")
             .style("margin-left","25px")
