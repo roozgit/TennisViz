@@ -17,9 +17,58 @@
         <p id="gameInfo">Circles represent players. Stars represent winning the cup.
             Click on a player to see their games and their stats compared to others.
             Link colors represent the round of the tournament.</p></div>
-    <div class="rightSide"><h1>Player Statistics Compared to All other Players.</h1></div>
+    <div class="rightSide"><h1>Player Statistics Compared to Other Players</h1></div>
 </div>
+<div>
+    <h2>Overview Chart</h2>
+    <p>This chart visualizes all the players and all the games in the dataset.</p>
+    <ul>
+        <li>Marks for players: each circle denotes one player in the dataset. Star glyphs show the number of times the player has won the cup. On click, player name will appear on the right side
+        of the circle</li>
+        <li>
+            Marks for games: each edge in graph show one game in the dataset. Hovering the pointer over the edge causes the game information to be displayed on the top section of the chart.
+        </li>
+        <li>Channels for players: Circle areas are encoded by the number of wins; a larger circle implies better player. Besides groups of players that have the close number of wins are
+        clustered together using a force clustering technique.</li>
+        <li>Channels for games: edges are encoded by the round the game was played. Furthermore, by clicking on the legend on the top left corner of the overview, all the games that were
+        played in that specific round will be shown</li>
+    </ul>
+    <h2>Detail Chart</h2>
+    <p>This chart visualizes all the metrics in the dataset. By default, it uses a box plot to show minimum, maximum, and median value of a certain statistic in the dataset. The boxplots
+    will change according to the tournament year selected to summarize the statistic for the selected tournament. Clicking on a player in the overview chart will cause their statistics
+     to be displayed alongside the box plot.</p>
+    <ul>
+        <li>Marks for summary statistics (all players): rectangles and lines; rectangle upper and lower edges show minimum and maximum of the categorical statistic. The line passing through the rectangle
+        shows the median value for the category.</li>
+        <li>
+            Marks for summary statistics (individual player): The distribution of the player's statistic will be shown as small blue dots.</li>
+        <li>Channels for summary statistics (all players): position of the rectangle relative to x and y axis.</li>
+        <li>Channels for summary statistics (individual player): position of the points relative to x and y axis</li>
+    </ul>
+    <h2>All Interactions</h2>
+    <ul>
+        <li>Clicking on a player shows the distribution of their summary stats compared to everyone in the dataset.</li>
+        <li>Players can be selected either by clicking on the circles in the graph or by selecting their name from a select control.</li>
+        <li>Tournament year can be selected using a select control. Upon change, both overview and detail charts will change to reflect
+        players and statistics for the selected tournament.</li>
+        <li>A reset button is provided; clicking on it will show the original visualization.</li>
+        <li>Hovering the pointer on an edge will show match information.</li>
+        <li>Clicking on legend will show all the matches played in that round. In combination with tournament filter, this can provide a quick overview of what rounds the player
+        played in.</li>
+    </ul>
+    <h2>Extra Credit</h2>
+    <p>The extra filtering mechanisms provided along with extra interaction with the legend satisfy the criteria for extra credit.</p>
+    <h2>Quirks</h2>
+    <ul>
+        <li>Even if a tournament winner was not present in a certain tournament, their stars will still be displayd. This is by design so the user can always have some idea about the most
+     interesting players. But it can be fixed.</li>
+        <li>The force layout is only used for clustering and automatic positioning of the nodes. The animation is only for aesthetic purposes and does not convey any useful information except
+        to visually separate players with more wins. The amount of code needed to make this a static graph was considerable so I decided to leave it as is.</li>
+        <li>I have opted for a fully rectangular box plot instead of a box and whisker plot. This is to avoid extra statistical computations to determine IQR and other statistical
+        properties of a box and whisker plot. However, a box and whisker plot would do a better job in showing the outliers.</li>
+    </ul>
 
+</div>
 <script type="text/javascript" src="globals.js"></script>
 <script>
     function drawEverything() {
@@ -189,13 +238,6 @@
             let connected = d3.selectAll(".links")
                 .filter(x => x.source.id === d.id || x.target.id === d.id);
 
-            // connected.attr("d", d => {
-            //     let dx = d.target.x - d.source.x,
-            //         dy = d.target.y - d.source.y,
-            //         dr = Math.sqrt(dx * dx + dy * dy)*(d.gameNo-1);
-            //     return "M" + d.source.x + "," + d.source.y + "A" + dr + ","
-            //         + dr + " 0 0,1 " + d.target.x + "," + d.target.y;
-            // });
             connected.style("visibility", null);
             d3.select("#edges").raise();
 
@@ -212,6 +254,8 @@
         }
 
         function drawDistribution(pdata) {
+            let year = parseInt(d3.select("#tourney").node().value);
+
             //clear already drawn points
             d3.selectAll("g#playerSpeedDist").remove();
             d3.selectAll("g#playerPercentageDist").remove();
@@ -228,13 +272,16 @@
             let percentageDists = new Map();
             let pointDists = new Map();
             for(let cat of speedCats)
-                speedDists.set(cat, playerData.get(pdata.id)[cat]);
+                speedDists.set(cat, playerData.get(pdata.id)[cat]
+                    .filter((_, i) => year===2003 ? true : playerData.get(pdata.id)['compYear'][i] === year));
 
             for(let cat of percentageCats)
-                percentageDists.set(cat, playerData.get(pdata.id)[cat]);
+                percentageDists.set(cat, playerData.get(pdata.id)[cat]
+                    .filter((_, i) => year===2003 ? true : playerData.get(pdata.id)['compYear'][i] === year));
 
             for(let cat of pointCats)
-                pointDists.set(cat, playerData.get(pdata.id)[cat]);
+                pointDists.set(cat, playerData.get(pdata.id)[cat]
+                    .filter((_, i) => year===2003 ? true : playerData.get(pdata.id)['compYear'][i] === year));
 
             //Paint points on speed svg
             let lineDists = d3.select("svg#summary")
@@ -333,6 +380,7 @@
             d3.select("#gameInfo").text("Winner: " + hero);
             simulation.alphaTarget(.02).restart();
             d3.select("select").attr("disabled","disabled");
+            drawDetail(value);
         }
 
         function filterPlayer() {
@@ -380,25 +428,39 @@
 
     //Second chart
     function drawDetail(dyear) {
+        d3.select("#summary").remove();
+        d3.select("#summary2").remove();
+        d3.select("#summary3").remove();
+        summary = {dims : {}, stats : {average: {}, median: {}, maximum: {}, minimum: {}, extent: {}}};
+
         for(let v of playerData.values()) {
             for(let p of Object.getOwnPropertyNames(v)) {
                 if(!summary.dims[p]) summary.dims[p] = [];
                 if(p === "hero" || p === "wins")
                     summary.dims[p].push(v[p]);
-                else summary.dims[p] = summary.dims[p].concat(v[p].filter(x => x === 0 ? true : Boolean(x)));
+                else summary.dims[p] = summary.dims[p].concat(
+                    v[p].filter((x, i) =>
+                        (dyear ? v['compYear'][i] === parseInt(dyear) : true) && (x === 0 ? true : Boolean(x))));
             }
         }
         for(let p of Object.getOwnPropertyNames(summary.dims)) {
+            let dimlen = summary.dims[p].length;
+            if(dimlen === 0) {
+                summary.stats.average[p] = 0;
+                summary.stats.median[p] = 0;
+                summary.stats.maximum[p] = 0;
+                summary.stats.minimum[p] = 0;
+                summary.stats.extent[p] =[0, 0];
+                continue;
+            }
             summary.dims[p].sort();
             summary.stats.average[p] = d3.sum(summary.dims[p])/summary.dims[p].length;
-            let dimlen = summary.dims[p].length;
             summary.stats.median[p] = dimlen % 2 === 1 ? summary.dims[p][Math.floor(dimlen / 2)] :
                 (summary.dims[p][Math.floor(dimlen / 2)] + summary.dims[p][Math.floor(dimlen / 2) -1]) / 2;
             summary.stats.maximum[p] = d3.max(summary.dims[p]);
             summary.stats.minimum[p] = d3.min(summary.dims[p]);
             summary.stats.extent[p] = d3.extent(summary.dims[p]);
         }
-
         //Draw svg for speeds
         let rightChart = d3.select('div.rightSide').append('svg')
             .attr("id","summary")
@@ -425,7 +487,6 @@
             .append("g")
             .attr("transform",
                 "translate(" + margin.left + "," + margin.top + ")");
-
 
         //Draw speed boxes
         let speedCats = ["avgFirstServeSpd", "avgSecServeSpd", "fastestServeSpd"];
@@ -587,7 +648,7 @@
             .enter()
             .append("option")
             .attr("value", d => d)
-            .text(d => d);
+            .text(d => d===2003 ? "All" : d);
 
         let psorted = [...playerData.keys()].sort();
         d3.select(".leftSide")
@@ -607,7 +668,9 @@
             .attr("id","reset").text("Reset")
             .on("click", () => {
                 d3.select("select").attr("disabled", null);
-                drawEverything()
+                d3.select("#tourney").node().value = "2003";
+                drawDetail();
+                drawEverything();
             });
     }
 
@@ -620,9 +683,9 @@
      |_|  |_/_/    \_\_____|_| \_|
         */
     var proxyUrl = 'https://cors-anywhere.herokuapp.com/',
-        targetUrl = 'https://sites.google.com/a/asu.edu/cse-578-fall-2018/homework/hw-2-d3-programming/10yearAUSOpenMatches.csv?attredirects=0&d=1'
+        targetUrl = 'https://sites.google.com/a/asu.edu/cse-578-fall-2018/homework/hw-2-d3-programming/10yearAUSOpenMatches.csv?attredirects=0&d=1';
     //If faced with CORS problem, replace "data.csv" with proxyUrl + targetUrl
-    d3.csv("data.csv").then(data => {
+    d3.csv(proxyUrl + targetUrl).then(data => {
         data.forEach( d => {
             let ed = new Edge(d['player1'], d['player2']
                 , d['round'], d['year'], d['results']);

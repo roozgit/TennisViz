@@ -48,6 +48,9 @@ function PlayerStats() {
     this.breakPointsPct = [];
     this.returnsWonPct = [];
     this.netsPct = [];
+
+    //years that above arrays contain data for
+    this.compYear = [];
 }
 
 let playerData = new Map();
@@ -67,6 +70,7 @@ function updateStats(playerStat, stat, no) {
     playerStat.pointsWonNotReceived.push(parseInt(stat['winner' + no]));
     playerStat.errors.push(parseInt(stat['error' + no]));
     playerStat.netsPct.push(parseInt(stat['net' + no].slice(0, -1)));
+    playerStat.compYear.push(parseInt(stat['year']));
 
     if(stat['round'] === "Final" && no === 1) playerStat.hero += 1;
     if(no === 1) playerStat.wins += 1;
