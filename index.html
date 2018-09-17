@@ -45,7 +45,7 @@
         <li>Channels for summary statistics (all players): position of the rectangle relative to x and y axis.</li>
         <li>Channels for summary statistics (individual player): position of the points relative to x and y axis</li>
     </ul>
-    <h2>All Interactions</h2>
+    <h2>Interactions</h2>
     <ul>
         <li>Clicking on a player shows the distribution of their summary stats compared to everyone in the dataset.</li>
         <li>Players can be selected either by clicking on the circles in the graph or by selecting their name from a select control.</li>
@@ -57,7 +57,16 @@
         played in.</li>
     </ul>
     <h2>Extra Credit</h2>
-    <p>The extra filtering mechanisms provided along with extra interaction with the legend satisfy the criteria for extra credit.</p>
+    <p>The extra filtering mechanisms provided along with extra interaction with the legend meet the criteria for extra credit.</p>
+    <h2>Visualization Insights</h2>
+    <p>As a person with no knowledge of tennis stats, this visualization helped me put those stats into context. In addition to interesting information
+    such as who won which cup and what happened in a certain final round, the distribution of a player's stat both in the 10-year old span and single
+    tournaments are available. For example, this visualization clearly shows that Rafael Nadal makes fewer errors than the median percentage of
+    other players. Or we can see that Novak Djokovic's second serves are faster than most. Also, contrary to what I personally thought, the players
+    who have won the cup most (Nadal, Federer, and Djokovic) do not serve much faster than others. The fastest serve stat for these players is centered
+     around a median of approximately 225 km/h. Another insight was obtained by filtering using match round; this allowed me to discover interesting
+    players who have made it to higher rounds such as Nicolas Kiefer despite their node not having a particularly large radius.</p>
+
     <h2>Quirks</h2>
     <ul>
         <li>Even if a tournament winner was not present in a certain tournament, their stars will still be displayd. This is by design so the user can always have some idea about the most
@@ -685,7 +694,7 @@
     var proxyUrl = 'https://cors-anywhere.herokuapp.com/',
         targetUrl = 'https://sites.google.com/a/asu.edu/cse-578-fall-2018/homework/hw-2-d3-programming/10yearAUSOpenMatches.csv?attredirects=0&d=1';
     //If faced with CORS problem, replace "data.csv" with proxyUrl + targetUrl
-    d3.csv(proxyUrl + targetUrl).then(data => {
+    d3.csv("data.csv").then(data => {
         data.forEach( d => {
             let ed = new Edge(d['player1'], d['player2']
                 , d['round'], d['year'], d['results']);
