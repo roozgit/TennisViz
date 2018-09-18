@@ -15,7 +15,8 @@
 <body>
 <h1>AUS Open Dataset Viz. (Roozbeh Khodadadeh, CSE 578, 9/16/18)</h1>
 <div class="colu">
-    <div class="leftSide"><p id="gameInfo">Select A Player</p></div>
+    <div class="leftSide"><p id="gameInfo">If nothing is displayed because of the browser's CORS policy, refer to line 873
+     in index.html source. Thanks!</p></div>
     <div class="rightSide"></div>
 </div>
 <div>
@@ -78,23 +79,20 @@
     <p>The extra filtering mechanisms provided along with extra interaction with the legend meet the criteria for extra
         credit.</p>
     <h2>Visualization Insights</h2>
-    <p>As a person with no knowledge of tennis stats, this visualization helped me put those stats into context. In
-        addition to interesting information
-        such as who won which cup and what happened in a certain final round, the distribution of a player's stat both
-        in the 10-year old span and single
-        tournaments are available. For example, this visualization clearly shows that Rafael Nadal makes fewer errors
-        than the median percentage of
+    <p>As a person with no knowledge of tennis stats, this visualization helped me put those stats into context.
+        For example, this visualization clearly shows that Rafael Nadal makes fewer errors than the median percentage of
         other players. Or we can see that Novak Djokovic's second serves are faster than most. Also, contrary to what I
-        personally thought, the players
-        who have won the cup most (Nadal, Federer, and Djokovic) do not serve much faster than others. The fastest serve
-        stat for these players is centered
-        around a median of approximately 225 km/h. Another insight was obtained by filtering using match round; this
-        allowed me to discover interesting
-        players who have made it to higher rounds such as Nicolas Kiefer despite their node not having a particularly
-        large radius.</p>
+        personally thought, the players who have won the cup most (Nadal, Federer, and Djokovic) do not serve much faster
+        than others. Another insight was obtained by filtering using match round; this
+        allowed me to discover interesting players who have made it to higher rounds such as Nicolas Kiefer or Andy Murray
+        despite their node not having a particularly large radius or stars.</p>
 
-    <h2>Quirks</h2>
+    <h2>Quirks and External Libraries</h2>
     <ul>
+        <li>I am using one external d3 library called forceCluster.js. It is only a wrapper around a clustering algorithm
+            from a bl.ock Mike Bostock originally created. <a href="https://github.com/ericsoco/d3-force-cluster">Here</a>
+             is the github link for this module. In any case, clustering is not an essential part of this visualization.
+        </li>
         <li>Even if a tournament winner was not present in a certain tournament, their stars will still be displayd.
             This is by design so the user can always have some idea about the most
             interesting players. But it can be fixed.
@@ -112,16 +110,102 @@
     </ul>
 
 </div>
-<script type="text/javascript" src="globals.js"></script>
+
+<script type="text/javascript">
+    //DEFINE GLOBAL VARIABLES AND DATA HANDLING FUNCTIONS
+    let leftChartWidth = 700;
+    let leftChartHeight = 800;
+    let rightChartWidth = 410;
+    let rightChartHeight = 180;
+    let rightChartHeight2 = 180;
+    let rightChartHeight3 = 180;
+    let margin = {top: 10, right: 20, bottom: 100, left: 55};
+    let scales = {speedScales: {}, percentScales: {}, pointScales:{}};
+
+    let summary = {dims : {}, stats : {average: {}, median: {}, maximum: {}, minimum: {}, extent: {}}};
+
+    function Node(name, country) {
+        this.id = name;
+        this.country = country;
+        this.cluster = 0;
+        this.radius = 10;
+    }
+
+    function Edge(source, target, rround, yyear, setInfo) {
+        this.source = source;
+        this.target = target;
+        this.tourneyRound = rround;
+        this.tourneyYear = yyear;
+        this.setInfo = setInfo;
+        this.gameNo = 1;
+    }
+
+    function PlayerStats() {
+        this.hero = 0;
+        this.wins = 0;
+
+        //serve speed types
+        this.avgFirstServeSpd = [];
+        this.avgSecServeSpd = [];
+        this.fastestServeSpd = [];
+
+        //point types
+        this.aces = [];
+        this.doubleFaults = [];
+        this.pointsWonNotReceived = [];
+        this.errors = [];
+        this.totalPointsWon = [];
+
+        //Percentage types
+        this.firstServePct = [];
+        this.firstPointWonPct = [];
+        this.secPointWonPct = [];
+        this.breakPointsPct = [];
+        this.returnsWonPct = [];
+        this.netsPct = [];
+
+        //years that above arrays contain data for
+        this.compYear = [];
+    }
+
+    let playerData = new Map();
+
+    function updateStats(playerStat, stat, no) {
+        playerStat.firstServePct.push(parseInt(stat['firstServe' + no].slice(0, -1)));
+        playerStat.aces.push(parseInt(stat['ace' + no]));
+        playerStat.doubleFaults.push(parseInt(stat['double' + no]));
+        playerStat.firstPointWonPct.push(parseInt(stat['firstPointWon' + no].slice(0,-1)));
+        playerStat.secPointWonPct.push(parseInt(stat['secPointWon' + no].slice(0, -1)));
+        playerStat.fastestServeSpd.push(parseInt(stat['fastServe' + no]));
+        playerStat.avgFirstServeSpd.push(parseInt(stat['avgFirstServe' + no]));
+        playerStat.avgSecServeSpd.push(parseInt(stat['avgSecServe' + no]));
+        playerStat.breakPointsPct.push(parseInt(stat['break' + no].slice(0, -1)));
+        playerStat.returnsWonPct.push(parseInt(stat['return' + no].slice(0, -1)));
+        playerStat.totalPointsWon.push(parseInt(stat['total' + no]));
+        playerStat.pointsWonNotReceived.push(parseInt(stat['winner' + no]));
+        playerStat.errors.push(parseInt(stat['error' + no]));
+        playerStat.netsPct.push(parseInt(stat['net' + no].slice(0, -1)));
+        playerStat.compYear.push(parseInt(stat['year']));
+
+        if(stat['round'] === "Final" && no === 1) playerStat.hero += 1;
+        if(no === 1) playerStat.wins += 1;
+    }
+
+    let graph = {
+        'nodes' : [],
+        'edges' : []
+    };
+</script>
+
 <script>
     function drawEverything() {
         d3.select("#graph").remove();
         let z = d3.scaleOrdinal(d3.schemeOrRd[7]);
         let clusters = {
-            0: {x: 300, y: 100},
-            1: {x: 300, y: 400},
-            2: {x: 300, y: 500},
-            3: {x: 300, y: 650},
+            0: {x: 300, y: 110},
+            1: {x: 300, y: 350},
+            2: {x: 200, y: 510},
+            3: {x: 400, y: 650},
             4: {x: 350, y: 300},
             5: {x: 0, y: 0},
             6: {x: 200, y: 300}
@@ -204,43 +288,6 @@
                 .on("drag", dragger("dragging"))
                 .on("end", dragger("ended")));
 
-        // let flags = d3.select("#graph")
-        //     .selectAll("#graph image")
-        //     .data(graph.nodes).enter()
-        //     .append("svg:image")
-        //     .attr("class", "flag")
-        //     .attr("xlink:href",  d => {
-        //         let xc = d.country;
-        //         switch(d.country) {
-        //             case "SUI": xc = "CHE"; break;
-        //             case "GER": xc = "DEU"; break;
-        //             case "CHI": xc = "CHN"; break;
-        //             case "PHI": xc = "PHL"; break;
-        //             case "RSA": xc = "ZAF"; break;
-        //             case "CRO": xc = "HRV"; break;
-        //             case "SLO": xc = "SVN"; break;
-        //             case "DEN": xc = "DNK"; break;
-        //             case "NED": xc = "NLD"; break;
-        //             case "URU": xc = "URY"; break;
-        //             case "POR": xc = "PRT"; break;
-        //             case "LAT": xc = "LVA"; break;
-        //             case "BUL": xc = "BGR"; break;
-        //             case "MON": xc = "MCO"; break;
-        //             case "TPE": xc = "TWN"; break;
-        //             case "CRC": xc = "CRI"; break;
-        //             case "GRE": xc = "GRC"; break;
-        //             case "ALG": xc = "DZA"; break;
-        //
-        //         }
-        //         return "https://restcountries.eu/data/" + xc.toLowerCase() + ".svg"
-        //     })
-        //     .attr("height", d => d.radius)
-        //     .attr("width", d => d.radius)
-        //     .call(d3.drag()
-        //         .on("start", dragger("started"))
-        //         .on("drag", dragger("dragging"))
-        //         .on("end", dragger("ended")));
-
         let heroLabels = leftChart.append("g")
             .attr("class", "heroLabels")
             .selectAll("text.heroLabels")
@@ -260,29 +307,29 @@
         d3.select("#player").on("change", filterPlayer);
 
         let simulation = d3.forceSimulation()
-            .force("gravity", d3.forceManyBody(.8))
+            .force("gravity", d3.forceManyBody(.4))
             .force("link", d3.forceLink().id(d => d.id).distance(0).strength(0))
-            .force("charge", d3.forceManyBody().strength(2))
+            .force("charge", d3.forceManyBody().strength(10))
             .force('cluster', d3.forceCluster()
                 .centers(function (d) {
                     return clusters[d.cluster];
                 })
                 .strength(0.8)
-                .centerInertia(1.0))
+                .centerInertia(1))
             .force('collide', d3.forceCollide(d => {
                 switch(d.cluster) {
                     case 0: return d.radius;
-                    case 1: return d.radius;
-                    case 2: return d.radius + 5;
+                    case 1: return d.radius + 10;
+                    case 2: return d.radius + 10;
                     case 3: return d.radius + 10;
-                    case 4: return d.radius + 15;
-                    case 5: return d.radius + 20;
-                    case 6: return d.radius + 25;
+                    case 4: return d.radius + 10;
+                    case 5: return d.radius + 15;
+                    case 6: return d.radius + 15;
                 }
 
-            }).strength(.9).iterations(1))
-            .force("x",d3.forceX(leftChartWidth/2))
-            .force("y",d3.forceY(leftChartHeight/2));
+            }).strength(.7).iterations(2))
+            .force("x",d3.forceX(leftChartWidth/2).strength(.1))
+            .force("y",d3.forceY(leftChartHeight/2).strength(.1));
 
         simulation.nodes(graph.nodes)
             .on("tick", () => {
@@ -842,10 +889,8 @@
 
             graph.edges.push(ed);
         })
-    })//.then()
-        .then(drawDetail)
+    }).then(drawDetail)
         .then(registerControls)
-        //.then(drawDetail)
         .then(drawEverything);
 
 </script>
