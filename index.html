@@ -5,76 +5,110 @@
     <title>Tennis ViZ; Roozbeh Khodadadeh; CSE 578; 9-5-2018</title>
     <style>.colu {
         display: flex;
+    }
+    .rightSide {
+        padding : 15px;
     }</style>
     <script type="text/javascript" src="js/d3.js"></script>
-    <script type="text/javascript" src="js/forceAttract.js"></script>
     <script type="text/javascript" src="js/forceCluster.js"></script>
 </head>
 <body>
-
+<h1>AUS Open Dataset Viz. (Roozbeh Khodadadeh, CSE 578, 9/16/18)</h1>
 <div class="colu">
-    <div class="leftSide"><h1>Overview of Players for AUS OPEN from 2004 to 2014</h1>
-        <p id="gameInfo">Circles represent players. Stars represent winning the cup.
-            Click on a player to see their games and their stats compared to others.
-            Link colors represent the round of the tournament.</p></div>
-    <div class="rightSide"><h1>Player Statistics Compared to Other Players</h1></div>
+    <div class="leftSide"><p id="gameInfo">Select A Player</p></div>
+    <div class="rightSide"></div>
 </div>
 <div>
     <h2>Overview Chart</h2>
     <p>This chart visualizes all the players and all the games in the dataset.</p>
     <ul>
-        <li>Marks for players: each circle denotes one player in the dataset. Star glyphs show the number of times the player has won the cup. On click, player name will appear on the right side
-        of the circle</li>
-        <li>
-            Marks for games: each edge in graph show one game in the dataset. Hovering the pointer over the edge causes the game information to be displayed on the top section of the chart.
+        <li>Marks for players: each circle denotes one player in the dataset. Star glyphs show the number of times the
+            player has won the cup. On click, player name will appear on the right side
+            of the circle
         </li>
-        <li>Channels for players: Circle areas are encoded by the number of wins; a larger circle implies better player. Besides groups of players that have the close number of wins are
-        clustered together using a force clustering technique.</li>
-        <li>Channels for games: edges are encoded by the round the game was played. Furthermore, by clicking on the legend on the top left corner of the overview, all the games that were
-        played in that specific round will be shown</li>
+        <li>
+            Marks for games: each edge in graph show one game in the dataset. Hovering the pointer over the edge causes
+            the game information to be displayed on the top section of the chart.
+        </li>
+        <li>Channels for players: Circle areas are encoded by the number of wins; a larger circle implies better player.
+            Besides groups of players that have the close number of wins are
+            clustered together using a force clustering technique.
+        </li>
+        <li>Channels for games: edges are encoded by the round the game was played. Furthermore, by clicking on the
+            legend on the top left corner of the overview, all the games that were
+            played in that specific round will be shown
+        </li>
     </ul>
     <h2>Detail Chart</h2>
-    <p>This chart visualizes all the metrics in the dataset. By default, it uses a box plot to show minimum, maximum, and median value of a certain statistic in the dataset. The boxplots
-    will change according to the tournament year selected to summarize the statistic for the selected tournament. Clicking on a player in the overview chart will cause their statistics
-     to be displayed alongside the box plot.</p>
+    <p>This chart visualizes all the metrics in the dataset. By default, it uses a box plot to show minimum, maximum,
+        and median value of a certain statistic in the dataset. The boxplots
+        will change according to the tournament year selected to summarize the statistic for the selected tournament.
+        Clicking on a player in the overview chart will cause their statistics
+        to be displayed alongside the box plot.</p>
     <ul>
-        <li>Marks for summary statistics (all players): rectangles and lines; rectangle upper and lower edges show minimum and maximum of the categorical statistic. The line passing through the rectangle
-        shows the median value for the category.</li>
+        <li>Marks for summary statistics (all players): rectangles and lines; rectangle upper and lower edges show
+            minimum and maximum of the categorical statistic. The line passing through the rectangle
+            shows the median value for the category.
+        </li>
         <li>
-            Marks for summary statistics (individual player): The distribution of the player's statistic will be shown as small blue dots.</li>
+            Marks for summary statistics (individual player): The distribution of the player's statistic will be shown
+            as small blue dots.
+        </li>
         <li>Channels for summary statistics (all players): position of the rectangle relative to x and y axis.</li>
         <li>Channels for summary statistics (individual player): position of the points relative to x and y axis</li>
     </ul>
     <h2>Interactions</h2>
     <ul>
         <li>Clicking on a player shows the distribution of their summary stats compared to everyone in the dataset.</li>
-        <li>Players can be selected either by clicking on the circles in the graph or by selecting their name from a select control.</li>
-        <li>Tournament year can be selected using a select control. Upon change, both overview and detail charts will change to reflect
-        players and statistics for the selected tournament.</li>
+        <li>Players can be selected either by clicking on the circles in the graph or by selecting their name from a
+            select control.
+        </li>
+        <li>Tournament year can be selected using a select control. Upon change, both overview and detail charts will
+            change to reflect
+            players and statistics for the selected tournament.
+        </li>
         <li>A reset button is provided; clicking on it will show the original visualization.</li>
         <li>Hovering the pointer on an edge will show match information.</li>
-        <li>Clicking on legend will show all the matches played in that round. In combination with tournament filter, this can provide a quick overview of what rounds the player
-        played in.</li>
+        <li>Clicking on legend will show all the matches played in that round. In combination with tournament filter,
+            this can provide a quick overview of what rounds the player
+            played in.
+        </li>
     </ul>
     <h2>Extra Credit</h2>
-    <p>The extra filtering mechanisms provided along with extra interaction with the legend meet the criteria for extra credit.</p>
+    <p>The extra filtering mechanisms provided along with extra interaction with the legend meet the criteria for extra
+        credit.</p>
     <h2>Visualization Insights</h2>
-    <p>As a person with no knowledge of tennis stats, this visualization helped me put those stats into context. In addition to interesting information
-    such as who won which cup and what happened in a certain final round, the distribution of a player's stat both in the 10-year old span and single
-    tournaments are available. For example, this visualization clearly shows that Rafael Nadal makes fewer errors than the median percentage of
-    other players. Or we can see that Novak Djokovic's second serves are faster than most. Also, contrary to what I personally thought, the players
-    who have won the cup most (Nadal, Federer, and Djokovic) do not serve much faster than others. The fastest serve stat for these players is centered
-     around a median of approximately 225 km/h. Another insight was obtained by filtering using match round; this allowed me to discover interesting
-    players who have made it to higher rounds such as Nicolas Kiefer despite their node not having a particularly large radius.</p>
+    <p>As a person with no knowledge of tennis stats, this visualization helped me put those stats into context. In
+        addition to interesting information
+        such as who won which cup and what happened in a certain final round, the distribution of a player's stat both
+        in the 10-year old span and single
+        tournaments are available. For example, this visualization clearly shows that Rafael Nadal makes fewer errors
+        than the median percentage of
+        other players. Or we can see that Novak Djokovic's second serves are faster than most. Also, contrary to what I
+        personally thought, the players
+        who have won the cup most (Nadal, Federer, and Djokovic) do not serve much faster than others. The fastest serve
+        stat for these players is centered
+        around a median of approximately 225 km/h. Another insight was obtained by filtering using match round; this
+        allowed me to discover interesting
+        players who have made it to higher rounds such as Nicolas Kiefer despite their node not having a particularly
+        large radius.</p>
 
     <h2>Quirks</h2>
     <ul>
-        <li>Even if a tournament winner was not present in a certain tournament, their stars will still be displayd. This is by design so the user can always have some idea about the most
-     interesting players. But it can be fixed.</li>
-        <li>The force layout is only used for clustering and automatic positioning of the nodes. The animation is only for aesthetic purposes and does not convey any useful information except
-        to visually separate players with more wins. The amount of code needed to make this a static graph was considerable so I decided to leave it as is.</li>
-        <li>I have opted for a fully rectangular box plot instead of a box and whisker plot. This is to avoid extra statistical computations to determine IQR and other statistical
-        properties of a box and whisker plot. However, a box and whisker plot would do a better job in showing the outliers.</li>
+        <li>Even if a tournament winner was not present in a certain tournament, their stars will still be displayd.
+            This is by design so the user can always have some idea about the most
+            interesting players. But it can be fixed.
+        </li>
+        <li>The force layout is only used for clustering and automatic positioning of the nodes. The animation is only
+            for aesthetic purposes and does not convey any useful information except
+            to visually separate players with more wins. The amount of code needed to make this a static graph was
+            considerable so I decided to leave it as is.
+        </li>
+        <li>I have opted for a fully rectangular box plot instead of a box and whisker plot. This is to avoid extra
+            statistical computations to determine IQR and other statistical
+            properties of a box and whisker plot. However, a box and whisker plot would do a better job in showing the
+            outliers.
+        </li>
     </ul>
 
 </div>
@@ -84,22 +118,20 @@
         d3.select("#graph").remove();
         let z = d3.scaleOrdinal(d3.schemeOrRd[7]);
         let clusters = {
-            0: {x: leftChartWidth/2, y: leftChartHeight/2},
-            1: {x: leftChartWidth/4, y: leftChartHeight/2},
-            2: {x: 3*leftChartWidth/4, y: leftChartHeight/2+50},
-            3: {x: 3*leftChartWidth/4, y: leftChartHeight/4},
-            4: {x: leftChartWidth/4, y: 3*leftChartHeight/4},
-            5: {x: 5, y: 5},
-            6: {x: 3*leftChartWidth/4, y: 2*leftChartHeight/3}
+            0: {x: 300, y: 100},
+            1: {x: 300, y: 400},
+            2: {x: 300, y: 500},
+            3: {x: 300, y: 650},
+            4: {x: 350, y: 300},
+            5: {x: 0, y: 0},
+            6: {x: 200, y: 300}
         };
 
         graph.nodes
             .forEach(n => {
                 n.cluster =
-                    //playerData.get(n.id).hero;
                     Math.floor(playerData.get(n.id).wins / 10);
-                n.radius = playerData.get(n.id).wins+7;
-                //(playerData.get(n.id).hero) * 10 + 15;
+                n.radius = playerData.get(n.id).wins + 10;
                 n.x = n.cluster.x + Math.random();
                 n.y = n.cluster.y + Math.random();
             });
@@ -107,7 +139,7 @@
         //D3
 
         let leftChart = d3.select('div .leftSide').append('svg')
-            .attr("id","graph")
+            .attr("id", "graph")
             .attr('width', leftChartWidth)
             .attr('height', leftChartHeight)
             .style('border', "1px solid black")
@@ -117,27 +149,28 @@
                 d3.selectAll("g#playerPercentageDist").remove();
                 d3.selectAll("g#playerPointDist").remove();
                 d3.selectAll("#graph circle").style('opacity', 1);
-                d3.selectAll(".links").style("visibility","hidden");
+                d3.selectAll(".links").style("visibility", "hidden");
                 d3.selectAll("#edges").lower();
                 d3.selectAll("#graph text.labels")
                     .style("visibility", "hidden");
+                d3.selectAll("#graph text.heroLabels")
+                    .style("visibility", null);
                 d3.select("#gameInfo").text("Select a player");
             });
-
         addLegends();
 
         var link = leftChart.append("g")
-            .attr("id","edges")
+            .attr("id", "edges")
             .selectAll(".links")
             .data(graph.edges)
             .enter()
             .append("path")
             .attr("class", "links")
             .attr("stroke-width", "5px")
-            .attr("fill","none")
+            .attr("fill", "none")
             .attr("stroke", d => z(d.tourneyRound))
             .style("visibility", "hidden")
-            .on("mouseover",d => {
+            .on("mouseover", d => {
                 d3.select("#gameInfo")
                     .text("Year " + d.tourneyYear +
                         ", Round: " + d.tourneyRound +
@@ -146,16 +179,16 @@
             });
 
         let labels = leftChart.append("g")
-            .attr("class","labels")
+            .attr("class", "labels")
             .selectAll("text")
             .data(graph.nodes)
             .enter().append("text")
             .attr("dx", d => 5 + d.radius)
             .attr("dy", ".2em")
-            .attr("class","labels")
+            .attr("class", "labels")
             .attr("pointer-events", "none")
             .style("visibility", "hidden")
-            .text(d => d.id + "(" + d.country +")");
+            .text(d => d.id);
 
         var node = leftChart.append("g")
             .attr("class", "nodes")
@@ -163,36 +196,62 @@
             .data(graph.nodes)
             .enter().append("circle")
             .attr("r", d => d.radius)
-            .attr('fill', "darkblue")
+            .attr('fill', "lightblue")
+            .style("stroke", "black")
             .on("click", click)
             .call(d3.drag()
-                .on("start", d => {
-                    //d3.selectAll(".links").style("visibility","hidden");
-                    if (!d3.event.active) simulation.alphaTarget(0.03).restart();
-                    d.fx = d3.event.subject.x;
-                    d.fy = d3.event.subject.y;
-                })
-                .on("drag", d => {
-                    d.fx = d3.event.x;
-                    d.fy = d3.event.y;
-                })
-                .on("end", d => {
-                    if (!d3.event.active) simulation.alphaTarget(0);
-                    d.fx = null;
-                    d.fy = null;
-                }));
+                .on("start", dragger("started"))
+                .on("drag", dragger("dragging"))
+                .on("end", dragger("ended")));
+
+        // let flags = d3.select("#graph")
+        //     .selectAll("#graph image")
+        //     .data(graph.nodes).enter()
+        //     .append("svg:image")
+        //     .attr("class", "flag")
+        //     .attr("xlink:href",  d => {
+        //         let xc = d.country;
+        //         switch(d.country) {
+        //             case "SUI": xc = "CHE"; break;
+        //             case "GER": xc = "DEU"; break;
+        //             case "CHI": xc = "CHN"; break;
+        //             case "PHI": xc = "PHL"; break;
+        //             case "RSA": xc = "ZAF"; break;
+        //             case "CRO": xc = "HRV"; break;
+        //             case "SLO": xc = "SVN"; break;
+        //             case "DEN": xc = "DNK"; break;
+        //             case "NED": xc = "NLD"; break;
+        //             case "URU": xc = "URY"; break;
+        //             case "POR": xc = "PRT"; break;
+        //             case "LAT": xc = "LVA"; break;
+        //             case "BUL": xc = "BGR"; break;
+        //             case "MON": xc = "MCO"; break;
+        //             case "TPE": xc = "TWN"; break;
+        //             case "CRC": xc = "CRI"; break;
+        //             case "GRE": xc = "GRC"; break;
+        //             case "ALG": xc = "DZA"; break;
+        //
+        //         }
+        //         return "https://restcountries.eu/data/" + xc.toLowerCase() + ".svg"
+        //     })
+        //     .attr("height", d => d.radius)
+        //     .attr("width", d => d.radius)
+        //     .call(d3.drag()
+        //         .on("start", dragger("started"))
+        //         .on("drag", dragger("dragging"))
+        //         .on("end", dragger("ended")));
 
         let heroLabels = leftChart.append("g")
-            .attr("class","heroLabels")
+            .attr("class", "heroLabels")
             .selectAll("text.heroLabels")
-            .data(graph.nodes.filter(x => playerData.get(x.id).hero > 0))
+            .data(graph.nodes)//.filter(x => playerData.get(x.id).hero > 0))
             .enter().append('text')
-            .attr("dx", -10)
-            .attr("dy", -5)
-            .attr("class","heroLabels")
+            .attr("dx", d => "-" + (13*playerData.get(d.id).hero) + "px")
+            .attr("dy", 0)
+            .attr("class", "heroLabels")
             .attr("pointer-events", "none")
-            .attr("font-size", 16)
-            .style("stroke", "white")
+            .attr("font-size", d => d.radius / 2)
+            .style("opacity", 0.6)
             .html(d => "&#x2605;".repeat(playerData.get(d.id).hero));
 
         d3.select("#tourney").on("change", null);
@@ -201,40 +260,77 @@
         d3.select("#player").on("change", filterPlayer);
 
         let simulation = d3.forceSimulation()
-            .force("link", d3.forceLink().id(d => d.id).distance(0.1).strength(.001))
-            .force("charge", d3.forceManyBody().strength(-5.7))
-            .force("center", d3.forceCenter(leftChartWidth / 2, leftChartHeight / 2))
-            .force('attract', d3.forceAttract()
-               .target([leftChartWidth/2, leftChartHeight/2])
-               .strength(0.01))
+            .force("gravity", d3.forceManyBody(.8))
+            .force("link", d3.forceLink().id(d => d.id).distance(0).strength(0))
+            .force("charge", d3.forceManyBody().strength(2))
             .force('cluster', d3.forceCluster()
-               .centers(function (d) { return clusters[d.cluster]; })
-               .strength(.9)
-               .centerInertia(0.9))
-            .force('collide', d3.forceCollide(d => d.radius + 5).strength(0.1));
+                .centers(function (d) {
+                    return clusters[d.cluster];
+                })
+                .strength(0.8)
+                .centerInertia(1.0))
+            .force('collide', d3.forceCollide(d => {
+                switch(d.cluster) {
+                    case 0: return d.radius;
+                    case 1: return d.radius;
+                    case 2: return d.radius + 5;
+                    case 3: return d.radius + 10;
+                    case 4: return d.radius + 15;
+                    case 5: return d.radius + 20;
+                    case 6: return d.radius + 25;
+                }
+
+            }).strength(.9).iterations(1))
+            .force("x",d3.forceX(leftChartWidth/2))
+            .force("y",d3.forceY(leftChartHeight/2));
 
         simulation.nodes(graph.nodes)
             .on("tick", () => {
                 link.attr("d", d => {
                     let dx = d.target.x - d.source.x,
                         dy = d.target.y - d.source.y,
-                        dr = Math.sqrt(dx * dx + dy * dy)*(d.gameNo-1);
+                        dr = Math.sqrt(dx * dx + dy * dy) * (d.gameNo - 1);
                     return "M" + d.source.x + "," + d.source.y + "A" + dr + ","
                         + dr + " 0 0,1 " + d.target.x + "," + d.target.y;
                 });
 
-                node.attr("cx", d => d.x)
-                    .attr("cy", d => d.y)
-                    .attr("r", d => d.radius);
+                node.attr("cx", d => Math.max(d.radius, Math.min(leftChartWidth - d.radius, d.x)))
+                    .attr("cy", d => Math.max(d.radius, Math.min(leftChartHeight - d.radius, d.y)));
 
                 labels.attr("x", d => d.x)
                     .attr("y", d => d.y);
 
-                heroLabels.attr("x", d => d.x)
-                    .attr("y", d => d.y)
+                heroLabels.attr("x", d => Math.max(d.radius, Math.min(leftChartWidth - d.radius, d.x)))
+                    .attr("y", d => Math.max(d.radius, Math.min(leftChartHeight - d.radius, d.y)));
+
+                // flags.attr("x", d => d.x-d.radius/2)
+                //     .attr("y", d => d.y-d.radius/2);
             });
 
         simulation.force("link").links(graph.edges);
+
+        function dragger(option) {
+            let started = d => {
+                if (!d3.event.active) simulation.alphaTarget(0.02).restart();
+                d.fx = d3.event.subject.x;
+                d.fy = d3.event.subject.y;
+            };
+
+            let dragging = d => {
+                d.fx = d3.event.x;
+                d.fy = d3.event.y;
+            };
+            let ended = d => {
+                if (!d3.event.active) simulation.alphaTarget(0);
+                d.fx = null;
+                d.fy = null;
+            };
+            switch(option) {
+                case "started": return started;
+                case "dragging": return dragging;
+                case "ended": return ended;
+            }
+    }
 
         function click(d) {
             d3.event.stopPropagation();
@@ -242,7 +338,7 @@
                 .style('opacity', 0.2);
             d3.selectAll(".links")
                 .style("visibility", "hidden");
-            d3.selectAll("#graph text.labels").style("visibility", "hidden");
+            d3.selectAll("#graph text.labels, #graph text.heroLabels").style("visibility", "hidden");
 
             let connected = d3.selectAll(".links")
                 .filter(x => x.source.id === d.id || x.target.id === d.id);
@@ -255,10 +351,11 @@
                     x.id === br.source.id || x.id === br.target.id)
                     .style('opacity', 1);
 
-                d3.selectAll("#graph text.labels").filter(x => x.id === br.source.id ||
+                d3.selectAll("#graph text.labels, #graph text.heroLabels").filter(x => x.id === br.source.id ||
                     x.id === br.target.id)
                     .style('visibility', "visible");
             });
+            d3.select("#player option[value='"+d.id+"']").attr("selected", true);
             drawDistribution(d);
         }
 
@@ -280,17 +377,17 @@
             let speedDists = new Map();
             let percentageDists = new Map();
             let pointDists = new Map();
-            for(let cat of speedCats)
+            for (let cat of speedCats)
                 speedDists.set(cat, playerData.get(pdata.id)[cat]
-                    .filter((_, i) => year===2003 ? true : playerData.get(pdata.id)['compYear'][i] === year));
+                    .filter((_, i) => year === 2003 ? true : playerData.get(pdata.id)['compYear'][i] === year));
 
-            for(let cat of percentageCats)
+            for (let cat of percentageCats)
                 percentageDists.set(cat, playerData.get(pdata.id)[cat]
-                    .filter((_, i) => year===2003 ? true : playerData.get(pdata.id)['compYear'][i] === year));
+                    .filter((_, i) => year === 2003 ? true : playerData.get(pdata.id)['compYear'][i] === year));
 
-            for(let cat of pointCats)
+            for (let cat of pointCats)
                 pointDists.set(cat, playerData.get(pdata.id)[cat]
-                    .filter((_, i) => year===2003 ? true : playerData.get(pdata.id)['compYear'][i] === year));
+                    .filter((_, i) => year === 2003 ? true : playerData.get(pdata.id)['compYear'][i] === year));
 
             //Paint points on speed svg
             let lineDists = d3.select("svg#summary")
@@ -302,13 +399,13 @@
                 .attr("id", "playerSpeedDist");
 
             lineDists.selectAll("circle")
-            .data(d => {
-                let circData = [];
-                for(let i=0; i < d[1].length; i++)
-                    if(!isNaN(d[1][i]))
-                        circData.push({x: d[0], y: d[1][i]});
-                return circData;
-            }).enter()
+                .data(d => {
+                    let circData = [];
+                    for (let i = 0; i < d[1].length; i++)
+                        if (!isNaN(d[1][i]))
+                            circData.push({x: d[0], y: d[1][i]});
+                    return circData;
+                }).enter()
                 .append("circle")
                 .attr("cx", d => scales.speedScales.xs(d.x))
                 .attr("cy", d => scales.speedScales.ys(d.y))
@@ -327,8 +424,8 @@
             linePercentageDists.selectAll("circle")
                 .data(d => {
                     let circData = [];
-                    for(let i=0; i < d[1].length; i++)
-                        if(!isNaN(d[1][i]))
+                    for (let i = 0; i < d[1].length; i++)
+                        if (!isNaN(d[1][i]))
                             circData.push({x: d[0], y: d[1][i]});
                     return circData;
                 }).enter()
@@ -350,8 +447,8 @@
             linePointDists.selectAll("circle")
                 .data(d => {
                     let circData = [];
-                    for(let i=0; i < d[1].length; i++)
-                        if(!isNaN(d[1][i]))
+                    for (let i = 0; i < d[1].length; i++)
+                        if (!isNaN(d[1][i]))
                             circData.push({x: d[0], y: d[1][i]});
                     return circData;
                 }).enter()
@@ -370,7 +467,7 @@
             let nc = [...(new Set(n1c.concat(n2c)))];
             let ncollection = graph.nodes.filter(x => nc.includes(x.id));
 
-            link.style("visibility","hidden");
+            link.style("visibility", "hidden");
             d3.selectAll("#graph text.labels")
                 .style("visibility", "hidden");
             d3.selectAll("#graph circle")
@@ -388,13 +485,13 @@
             let hero = link.filter(d => d.tourneyRound === "Final").data()[0].source.id;
             d3.select("#gameInfo").text("Winner: " + hero);
             simulation.alphaTarget(.02).restart();
-            d3.select("select").attr("disabled","disabled");
+            d3.select("select").attr("disabled", "disabled");
             drawDetail(value);
         }
 
         function filterPlayer() {
-            let nod = d3.selectAll("#graph circle").filter(x => x.id===this.value);
-             nod.call(d => click(d.data()[0]));
+            let nod = d3.selectAll("#graph circle").filter(x => x.id === this.value);
+            nod.call(d => click(d.data()[0]));
         }
 
         function addLegends() {
@@ -440,39 +537,39 @@
         d3.select("#summary").remove();
         d3.select("#summary2").remove();
         d3.select("#summary3").remove();
-        summary = {dims : {}, stats : {average: {}, median: {}, maximum: {}, minimum: {}, extent: {}}};
+        summary = {dims: {}, stats: {average: {}, median: {}, maximum: {}, minimum: {}, extent: {}}};
 
-        for(let v of playerData.values()) {
-            for(let p of Object.getOwnPropertyNames(v)) {
-                if(!summary.dims[p]) summary.dims[p] = [];
-                if(p === "hero" || p === "wins")
+        for (let v of playerData.values()) {
+            for (let p of Object.getOwnPropertyNames(v)) {
+                if (!summary.dims[p]) summary.dims[p] = [];
+                if (p === "hero" || p === "wins")
                     summary.dims[p].push(v[p]);
                 else summary.dims[p] = summary.dims[p].concat(
                     v[p].filter((x, i) =>
                         (dyear ? v['compYear'][i] === parseInt(dyear) : true) && (x === 0 ? true : Boolean(x))));
             }
         }
-        for(let p of Object.getOwnPropertyNames(summary.dims)) {
+        for (let p of Object.getOwnPropertyNames(summary.dims)) {
             let dimlen = summary.dims[p].length;
-            if(dimlen === 0) {
+            if (dimlen === 0) {
                 summary.stats.average[p] = 0;
                 summary.stats.median[p] = 0;
                 summary.stats.maximum[p] = 0;
                 summary.stats.minimum[p] = 0;
-                summary.stats.extent[p] =[0, 0];
+                summary.stats.extent[p] = [0, 0];
                 continue;
             }
             summary.dims[p].sort();
-            summary.stats.average[p] = d3.sum(summary.dims[p])/summary.dims[p].length;
+            summary.stats.average[p] = d3.sum(summary.dims[p]) / summary.dims[p].length;
             summary.stats.median[p] = dimlen % 2 === 1 ? summary.dims[p][Math.floor(dimlen / 2)] :
-                (summary.dims[p][Math.floor(dimlen / 2)] + summary.dims[p][Math.floor(dimlen / 2) -1]) / 2;
+                (summary.dims[p][Math.floor(dimlen / 2)] + summary.dims[p][Math.floor(dimlen / 2) - 1]) / 2;
             summary.stats.maximum[p] = d3.max(summary.dims[p]);
             summary.stats.minimum[p] = d3.min(summary.dims[p]);
             summary.stats.extent[p] = d3.extent(summary.dims[p]);
         }
         //Draw svg for speeds
         let rightChart = d3.select('div.rightSide').append('svg')
-            .attr("id","summary")
+            .attr("id", "summary")
             .attr("width", rightChartWidth + margin.left + margin.right)
             .attr("height", rightChartHeight + margin.top + margin.bottom)
             .append("g")
@@ -481,7 +578,7 @@
 
         //Draw svg for percentages
         let rightChart2 = d3.select('div.rightSide').append('svg')
-            .attr("id","summary2")
+            .attr("id", "summary2")
             .attr("width", rightChartWidth + margin.left + margin.right)
             .attr("height", rightChartHeight2 + margin.top + margin.bottom)
             .append("g")
@@ -490,18 +587,30 @@
 
         //Draw svg for points
         let rightChart3 = d3.select('div.rightSide').append('svg')
-            .attr("id","summary3")
+            .attr("id", "summary3")
             .attr("width", rightChartWidth + margin.left + margin.right)
             .attr("height", rightChartHeight3 + margin.top + margin.bottom)
             .append("g")
             .attr("transform",
                 "translate(" + margin.left + "," + margin.top + ")");
+        rightChart3.append("text")
+            .attr("x", 0)
+            .attr("y", rightChartHeight3 + margin.bottom - 15)
+            .text("Statistical box plots for " + (dyear ? "year " + dyear : "all tournaments") +
+                ". Lower and upper sides of the rectangles represent the minimum " +
+                "and maximum of the dataset variable ")
+            .style("font-size", "10px");
+        rightChart3.append("text")
+            .attr("x", 0)
+            .attr("y", rightChartHeight3 + margin.bottom-5)
+            .text("as explained in the homework. The line going through the rectangle denotes the variable median.")
+            .style("font-size", "10px");
 
         //Draw speed boxes
         let speedCats = ["avgFirstServeSpd", "avgSecServeSpd", "fastestServeSpd"];
         let xspd = d3.scalePoint()
             .domain(speedCats)
-            .range([50 , rightChartWidth - 50]).padding(.5);
+            .range([50, rightChartWidth - 50]).padding(.2);
 
         let yspd = d3.scaleLinear()
             .domain(d3.extent([].concat(summary.stats.extent['avgFirstServeSpd'])
@@ -513,7 +622,12 @@
 
         rightChart.append("g")
             .attr("transform", "translate(0," + rightChartHeight + ")")
-            .call(d3.axisBottom(xspd));
+            .call(d3.axisBottom(xspd))
+            .selectAll("text")
+            .style("text-anchor", "end")
+            .attr("dx", "-.8em")
+            .attr("dy", ".15em")
+            .attr("transform", "rotate(-35)");
 
         rightChart.append("g")
             .call(d3.axisLeft(yspd));
@@ -521,36 +635,36 @@
         rightChart.append("text")
             .attr("transform", "rotate(-90)")
             .attr("y", 0 - margin.left)
-            .attr("x",0 - (rightChartHeight / 2))
+            .attr("x", 0 - (rightChartHeight / 2))
             .attr("dy", "1em")
             .style("text-anchor", "middle")
             .text("Speed(Km/h)");
 
-        for(let sc of speedCats) {
-            rightChart.append("g")
+        for (let sc of speedCats) {
+            rightChart//.append("g")
                 .append("rect")
-                .attr("x", xspd(sc) - 25)
+                .attr("x", xspd(sc) - 15)
                 .attr("y", yspd(summary.stats.maximum[sc]))
                 .attr("height", -yspd(summary.stats.maximum[sc]) + yspd(summary.stats.minimum[sc]))
-                .attr("width", "50px")
-                .attr("stroke-width","1px")
+                .attr("width", "30px")
+                .attr("stroke-width", "1px")
                 .attr("stroke", "black")
                 .attr("fill", "none");
-            rightChart.append("g")
+            rightChart//.append("g")
                 .append("line")
-                .attr("x1", xspd(sc) - 25)
+                .attr("x1", xspd(sc) - 15)
                 .attr("y1", yspd(summary.stats.median[sc]))
-                .attr("x2", xspd(sc) + 25)
+                .attr("x2", xspd(sc) + 15)
                 .attr("y2", yspd(summary.stats.median[sc]))
-                .attr("stroke","black");
+                .attr("stroke", "black");
         }
 
         //Draw percentage boxes
         let percentageCats = ["firstServePct", "firstPointWonPct", "secPointWonPct",
-        "breakPointsPct", "returnsWonPct", "netsPct"];
+            "breakPointsPct", "returnsWonPct", "netsPct"];
         let xspd2 = d3.scalePoint()
             .domain(percentageCats)
-            .range([50 , rightChartWidth - 50]).padding(.5);
+            .range([50, rightChartWidth - 50]).padding(0);
 
         let yspd2 = d3.scaleLinear()
             .domain(d3.extent([].concat(summary.stats.extent['firstServePct'])
@@ -565,34 +679,39 @@
 
         rightChart2.append("g")
             .attr("transform", "translate(0," + rightChartHeight2 + ")")
-            .call(d3.axisBottom(xspd2));
+            .call(d3.axisBottom(xspd2))
+            .selectAll("text")
+            .style("text-anchor", "end")
+            .attr("dx", "-.8em")
+            .attr("dy", ".15em")
+            .attr("transform", "rotate(-35)");
 
         rightChart2.append("g")
             .call(d3.axisLeft(yspd2));
         rightChart2.append("text")
             .attr("transform", "rotate(-90)")
             .attr("y", 0 - margin.left)
-            .attr("x",0 - (rightChartHeight / 2))
+            .attr("x", 0 - (rightChartHeight / 2))
             .attr("dy", "1em")
             .style("text-anchor", "middle")
             .text("Percentage");
-        for(let sc of percentageCats) {
-            rightChart2.append("g")
+        for (let sc of percentageCats) {
+            rightChart2//.append("g")
                 .append("rect")
-                .attr("x", xspd2(sc) - 25)
+                .attr("x", xspd2(sc) - 15)
                 .attr("y", yspd2(summary.stats.maximum[sc]))
                 .attr("height", -yspd2(summary.stats.maximum[sc]) + yspd2(summary.stats.minimum[sc]))
-                .attr("width", "50px")
-                .attr("stroke-width","1px")
+                .attr("width", "30px")
+                .attr("stroke-width", "1px")
                 .attr("stroke", "black")
                 .attr("fill", "none");
-            rightChart2.append("g")
+            rightChart2//.append("g")
                 .append("line")
-                .attr("x1", xspd2(sc) - 25)
+                .attr("x1", xspd2(sc) - 15)
                 .attr("y1", yspd2(summary.stats.median[sc]))
-                .attr("x2", xspd2(sc) + 25)
+                .attr("x2", xspd2(sc) + 15)
                 .attr("y2", yspd2(summary.stats.median[sc]))
-                .attr("stroke","black");
+                .attr("stroke", "black");
         }
 
         //Draw point boxes
@@ -600,7 +719,7 @@
             "errors", "totalPointsWon"];
         let xspd3 = d3.scalePoint()
             .domain(pointCats)
-            .range([50 , rightChartWidth - 50]).padding(.5);
+            .range([50, rightChartWidth - 50]).padding(0);
 
         let yspd3 = d3.scaleLinear()
             .domain(d3.extent([].concat(summary.stats.extent['aces'])
@@ -614,34 +733,39 @@
 
         rightChart3.append("g")
             .attr("transform", "translate(0," + rightChartHeight3 + ")")
-            .call(d3.axisBottom(xspd3));
+            .call(d3.axisBottom(xspd3))
+            .selectAll("text")
+            .style("text-anchor", "end")
+            .attr("dx", "-.8em")
+            .attr("dy", ".15em")
+            .attr("transform", "rotate(-35)");
 
         rightChart3.append("g")
             .call(d3.axisLeft(yspd3));
         rightChart3.append("text")
             .attr("transform", "rotate(-90)")
             .attr("y", 0 - margin.left)
-            .attr("x",0 - (rightChartHeight / 2))
+            .attr("x", 0 - (rightChartHeight / 2))
             .attr("dy", "1em")
             .style("text-anchor", "middle")
             .text("Count");
-        for(let sc of pointCats) {
+        for (let sc of pointCats) {
             rightChart3.append("g")
                 .append("rect")
-                .attr("x", xspd3(sc) - 25)
+                .attr("x", xspd3(sc) - 15)
                 .attr("y", yspd3(summary.stats.maximum[sc]))
                 .attr("height", -yspd3(summary.stats.maximum[sc]) + yspd3(summary.stats.minimum[sc]))
-                .attr("width", "50px")
-                .attr("stroke-width","1px")
+                .attr("width", "30px")
+                .attr("stroke-width", "1px")
                 .attr("stroke", "black")
                 .attr("fill", "none");
             rightChart3.append("g")
                 .append("line")
-                .attr("x1", xspd3(sc) - 25)
+                .attr("x1", xspd3(sc) - 15)
                 .attr("y1", yspd3(summary.stats.median[sc]))
-                .attr("x2", xspd3(sc) + 25)
+                .attr("x2", xspd3(sc) + 15)
                 .attr("y2", yspd3(summary.stats.median[sc]))
-                .attr("stroke","black");
+                .attr("stroke", "black");
         }
     }
 
@@ -650,20 +774,20 @@
         let trange = d3.range(2003, 2015);
         d3.select(".leftSide")
             .append("select")
-            .style("position","relative")
-            .attr("id","tourney")
+            .style("position", "relative")
+            .attr("id", "tourney")
             .selectAll("option")
             .data(trange)
             .enter()
             .append("option")
             .attr("value", d => d)
-            .text(d => d===2003 ? "All" : d);
+            .text(d => d === 2003 ? "All" : d);
 
         let psorted = [...playerData.keys()].sort();
         d3.select(".leftSide")
             .append("select")
-            .style("position","relative")
-            .attr("id","player")
+            .style("position", "relative")
+            .attr("id", "player")
             .selectAll("option")
             .data(psorted)
             .enter()
@@ -672,9 +796,9 @@
             .text(d => d);
 
         d3.select(".leftSide").append("button")
-            .style("position","relative")
-            .style("margin-left","25px")
-            .attr("id","reset").text("Reset")
+            .style("position", "relative")
+            .style("margin-left", "25px")
+            .attr("id", "reset").text("Reset")
             .on("click", () => {
                 d3.select("select").attr("disabled", null);
                 d3.select("#tourney").node().value = "2003";
@@ -695,31 +819,33 @@
         targetUrl = 'https://sites.google.com/a/asu.edu/cse-578-fall-2018/homework/hw-2-d3-programming/10yearAUSOpenMatches.csv?attredirects=0&d=1';
     //If faced with CORS problem, replace "data.csv" with proxyUrl + targetUrl
     d3.csv("data.csv").then(data => {
-        data.forEach( d => {
+        data.forEach(d => {
             let ed = new Edge(d['player1'], d['player2']
                 , d['round'], d['year'], d['results']);
 
-            if(playerData.get(d['player1']) === undefined) {
+            if (playerData.get(d['player1']) === undefined) {
                 graph.nodes.push(new Node(d['player1'], d['country1']));
                 playerData.set(d['player1'], new PlayerStats());
-                updateStats(playerData.get(d['player1']),d , 1);
+                updateStats(playerData.get(d['player1']), d, 1);
             } else
-                updateStats(playerData.get(d['player1']),d , 1);
+                updateStats(playerData.get(d['player1']), d, 1);
 
-            if(playerData.get(d['player2']) === undefined) {
+            if (playerData.get(d['player2']) === undefined) {
                 graph.nodes.push(new Node(d['player2'], d['country2']));
                 playerData.set(d['player2'], new PlayerStats());
-                updateStats(playerData.get(d['player2']),d , 2);
+                updateStats(playerData.get(d['player2']), d, 2);
             } else
-                updateStats(playerData.get(d['player2']),d , 2);
+                updateStats(playerData.get(d['player2']), d, 2);
 
-            if(graph.edges.some(ex => ex.source === ed.source && ex.target === ed.target))
+            if (graph.edges.some(ex => ex.source === ed.source && ex.target === ed.target))
                 ed.gameNo += 1;
 
             graph.edges.push(ed);
         })
-    }).then(drawDetail)
+    })//.then()
+        .then(drawDetail)
         .then(registerControls)
+        //.then(drawDetail)
         .then(drawEverything);
 
 </script>

@@ -1,10 +1,10 @@
-let leftChartWidth = 900;
-let leftChartHeight = 600;
-let rightChartWidth = 650;
+let leftChartWidth = 700;
+let leftChartHeight = 800;
+let rightChartWidth = 410;
 let rightChartHeight = 180;
 let rightChartHeight2 = 180;
 let rightChartHeight3 = 180;
-let margin = {top: 20, right: 20, bottom: 50, left: 55};
+let margin = {top: 10, right: 20, bottom: 100, left: 55};
 let scales = {speedScales: {}, percentScales: {}, pointScales:{}};
 
 let summary = {dims : {}, stats : {average: {}, median: {}, maximum: {}, minimum: {}, extent: {}}};
